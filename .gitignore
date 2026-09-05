@@ -1,0 +1,39 @@
+# Entornos virtuales
+venv/
+env/
+.venv/
+.env
+
+# Archivos de caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Archivos de texto planos
+*.txt
+
+# LaTeX
+*.aux
+*.log
+*.pdf
+*.out
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+*.nav
+*.snm
+*.synctex.gz
+*.out.synctex.gz
+*.synctex.gz(busy)
+
+# Directorios de salida generados por el script
+build/
+
+
+# Archivos del sistema operativo (opcional pero recomendado)
+.DS_Store
+Thumbs.db

@@ -1,0 +1,413 @@
+\documentclass[10pt,a4paper]{article}
+
+% --- Paquetes principales ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-nodecimaldot]{babel}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{geometry}
+\geometry{top=1.8cm, bottom=1.8cm, left=1.8cm, right=1.8cm}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{bm}
+\usepackage{microtype}
+\usepackage{fancyhdr}
+\usepackage{float}
+\usepackage{graphicx}
+\graphicspath{{report/}{./}{../}}
+\usepackage[justification=centering, font=small, labelfont=bf]{caption}
+
+% Permitir que las ecuaciones fluyan naturalmente entre páginas
+\allowdisplaybreaks
+
+% --- Colores y estilos ---
+\definecolor{primary}{RGB}{20, 50, 95}
+\definecolor{secondary}{RGB}{35, 110, 160}
+\definecolor{accent}{RGB}{210, 75, 55}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primary,
+    citecolor=secondary,
+    urlcolor=secondary
+}
+
+\setlength{\headheight}{14pt}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\textcolor{gray}{\small Tarea 1: Fundamentos de redes neuronales profundas}}
+\lhead{\textcolor{gray}{\small Edwyn Guzmán -- C.I. 30.326.271}}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\title{\vspace{-1.2cm}
+\textbf{\LARGE Tarea 1: Fundamentos de redes neuronales profundas}\\[0.3cm]
+\large Escuela de Computación, Facultad de Ciencias -- Universidad Central de Venezuela
+}
+\author{\textbf{Estudiante:} Edwyn Guzmán \quad (\text{C.I.} 30.326.271) \qquad \textbf{Profesor:} Fernando Crema García}
+\date{Semestre I-2026}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{fancy}
+\vspace{-1.0cm}
+\noindent\rule{\textwidth}{0.8pt}
+\vspace{0.1cm}
+
+\section*{II-A. Backpropagation}
+
+\subsection*{Arquitectura y parámetros iniciales de la red}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=4.8cm, keepaspectratio]{images/figura_1.png}
+    \caption{Arquitectura de la red neuronal $f: \mathbb{R}^2 \to \mathbb{R}$. Nodos negros: entradas $x_1, x_2$; nodos verdes: sesgos unitarios; nodos naranjas: capas ocultas con activación sigmoide $\sigma$; nodo rojo: salida lineal $y = f_2$.}
+    \label{fig:red}
+\end{figure}
+
+Para analizar el funcionamiento del algoritmo de retropropagación, trabajamos con la red neuronal que se muestra en la Figura~\ref{fig:red}. Esta red toma una entrada de dos dimensiones $\mathbf{x} = [x_1, x_2]^T$, tiene dos capas ocultas (con 3 neuronas en la primera y 2 en la segunda) que aplican la función de activación sigmoide $\sigma(t) = \frac{1}{1 + e^{-t}}$, y finalmente genera un valor de salida $f_2$ combinando las señales de forma lineal.
+
+Mirando las conexiones del diagrama, extraemos los valores iniciales de los pesos y los sesgos para cada capa:
+\begin{itemize}
+    \item \textbf{Capa 0, primera capa oculta con 3 neuronas:}
+    \[
+    \boldsymbol{\beta}_0 = \begin{bmatrix} 0.3 \\ 0.7 \\ 0.1 \end{bmatrix}, \quad
+    \boldsymbol{\Omega}_0 = \begin{bmatrix} 0.2 & -0.1 \\ 0.5 & 0.6 \\ -1.3 & 1.2 \end{bmatrix}
+    \]
+    \item \textbf{Capa 1, segunda capa oculta con 2 neuronas:}
+    \[
+    \boldsymbol{\beta}_1 = \begin{bmatrix} -0.3 \\ 0.3 \end{bmatrix}, \quad
+    \boldsymbol{\Omega}_1 = \begin{bmatrix} 1.3 & 0.6 & -0.7 \\ -0.2 & 0.1 & 0.4 \end{bmatrix}
+    \]
+    \item \textbf{Capa 2, capa de salida lineal con 1 neurona:}
+    \[
+    \boldsymbol{\beta}_2 = [0.2], \quad
+    \boldsymbol{\Omega}_2 = \begin{bmatrix} -0.9 & 2.1 \end{bmatrix}
+    \]
+\end{itemize}
+
+Para el entrenamiento usamos estos tres datos:
+\[
+(\mathbf{x}^{(1)}, y^{(1)}) = \left(\begin{bmatrix} 1 \\ 1 \end{bmatrix}, 1\right), \quad
+(\mathbf{x}^{(2)}, y^{(2)}) = \left(\begin{bmatrix} 0 \\ 2 \end{bmatrix}, 1\right), \quad
+(\mathbf{x}^{(3)}, y^{(3)}) = \left(\begin{bmatrix} -1 \\ 1 \end{bmatrix}, 0\right)
+\]
+Para medir el error de la red usamos la función de pérdida cuadrática. Calculamos el error de cada dato por separado como $\ell_i = (f_2(\mathbf{x}_i) - y_i)^2$, y obtenemos la pérdida total del \textit{batch} promediando los tres errores: $L = \frac{1}{3} \sum_{i=1}^3 \ell_i$.
+
+\subsection*{Formulación del paso hacia adelante}
+
+Siguiendo la formulación del libro (ecuación 7.24), el cálculo hacia adelante para la red del enunciado se escribe así:
+\begin{gather}
+    \mathbf{f}_0 = \boldsymbol{\beta}_0 + \boldsymbol{\Omega}_0 \mathbf{x}_i \\
+    \mathbf{h}_k = \sigma(\mathbf{f}_{k-1}), \quad k \in \{1, 2\} \\
+    \mathbf{f}_k = \boldsymbol{\beta}_k + \boldsymbol{\Omega}_k \mathbf{h}_k, \quad k \in \{1, 2\}
+\end{gather}
+En estas ecuaciones, cada término tiene una dimensión y un rol bien definidos:
+\begin{itemize}
+    \item $\mathbf{x}_i \in \mathbb{R}^{2 \times 1}$: vector con los dos datos de entrada, correspondientes a los nodos negros del diagrama.
+    \item $\boldsymbol{\beta}_0 \in \mathbb{R}^{3 \times 1}, \; \boldsymbol{\beta}_1 \in \mathbb{R}^{2 \times 1}$: vectores de sesgo de las capas ocultas, y $\beta_2 \in \mathbb{R}$ sesgo escalar de la salida (nodos verdes).
+    \item $\boldsymbol{\Omega}_0 \in \mathbb{R}^{3 \times 2}, \; \boldsymbol{\Omega}_1 \in \mathbb{R}^{2 \times 3}, \; \boldsymbol{\Omega}_2 \in \mathbb{R}^{1 \times 2}$: matrices de pesos que multiplican a las entradas de cada capa (con filas iguales a las neuronas de destino y columnas iguales a las neuronas de origen).
+    \item $\mathbf{f}_0 \in \mathbb{R}^{3 \times 1}, \; \mathbf{f}_1 \in \mathbb{R}^{2 \times 1}$: preactivaciones o sumas ponderadas antes de aplicar la función de activación en las capas ocultas.
+    \item $\mathbf{h}_1 \in \mathbb{R}^{3 \times 1}, \; \mathbf{h}_2 \in \mathbb{R}^{2 \times 1}$: activaciones de las capas ocultas tras evaluar la sigmoide, mostradas en color naranja.
+    \item $f_2 \in \mathbb{R}$: predicción escalar final calculada por la red en el nodo rojo de salida.
+\end{itemize}
+
+\subsection*{Adaptación del paso hacia atrás para activación sigmoide}
+
+En el libro (ecuación 7.25) se formula la retropropagación para activación ReLU. Como la red del enunciado utiliza activación sigmoide $\sigma(t) = \frac{1}{1 + e^{-t}}$, adaptamos las ecuaciones calculando primero su derivada analítica:
+\[
+\frac{d\sigma(t)}{dt} = \frac{e^{-t}}{(1 + e^{-t})^2} = \left(\frac{1}{1 + e^{-t}}\right)\left(1 - \frac{1}{1 + e^{-t}}\right) = \sigma(t)(1 - \sigma(t))
+\]
+Aplicando la regla de la cadena, el gradiente de la pérdida se transmite hacia la capa anterior multiplicando por los pesos traspuestos y por la derivada de la sigmoide en cada neurona:
+\[
+\frac{\partial \ell_i}{\partial \mathbf{f}_{k-1}} = \Big( \sigma(\mathbf{f}_{k-1}) \odot (\mathbf{1} - \sigma(\mathbf{f}_{k-1})) \Big) \odot \left( \boldsymbol{\Omega}_k^T \frac{\partial \ell_i}{\partial \mathbf{f}_k} \right)
+\]
+donde el símbolo $\odot$ representa el producto de Hadamard (multiplicación elemento a elemento). De este modo, las ecuaciones completas de retropropagación para la red quedan de la siguiente forma:
+\begin{gather}
+    \frac{\partial \ell_i}{\partial \boldsymbol{\beta}_k} = \frac{\partial \ell_i}{\partial \mathbf{f}_k}, \quad k \in \{2, 1, 0\} \\
+    \frac{\partial \ell_i}{\partial \boldsymbol{\Omega}_k} = \frac{\partial \ell_i}{\partial \mathbf{f}_k} \mathbf{h}_k^T, \quad k \in \{2, 1, 0\} \quad (\text{con } \mathbf{h}_0 = \mathbf{x}_i) \\
+    \frac{\partial \ell_i}{\partial \mathbf{f}_{k-1}} = \Big[ \sigma(\mathbf{f}_{k-1}) \odot (\mathbf{1} - \sigma(\mathbf{f}_{k-1})) \Big] \odot \left( \boldsymbol{\Omega}_k^T \frac{\partial \ell_i}{\partial \mathbf{f}_k} \right), \quad k \in \{2, 1\}
+\end{gather}
+
+Las dimensiones de los componentes en este paso hacia atrás son:
+\begin{itemize}
+    \item $\frac{\partial \ell_i}{\partial f_2} \in \mathbb{R}$: derivada escalar del error cuadrático respecto a la salida, calculada como $2(f_2 - y_i)$.
+    \item $\frac{\partial \ell_i}{\partial \beta_2} \in \mathbb{R}, \; \frac{\partial \ell_i}{\partial \boldsymbol{\beta}_1} \in \mathbb{R}^{2 \times 1}, \; \frac{\partial \ell_i}{\partial \boldsymbol{\beta}_0} \in \mathbb{R}^{3 \times 1}$: gradientes respecto a los sesgos de cada capa, iguales a $\frac{\partial \ell_i}{\partial \mathbf{f}_k}$.
+    \item $\frac{\partial \ell_i}{\partial \boldsymbol{\Omega}_2} \in \mathbb{R}^{1 \times 2}, \; \frac{\partial \ell_i}{\partial \boldsymbol{\Omega}_1} \in \mathbb{R}^{2 \times 3}, \; \frac{\partial \ell_i}{\partial \boldsymbol{\Omega}_0} \in \mathbb{R}^{3 \times 2}$: gradientes matriciales respecto a los pesos, obtenidos por el producto exterior $\frac{\partial \ell_i}{\partial \mathbf{f}_k} \mathbf{h}_k^T$.
+    \item $\frac{\partial \ell_i}{\partial \mathbf{f}_1} \in \mathbb{R}^{2 \times 1}, \; \frac{\partial \ell_i}{\partial \mathbf{f}_0} \in \mathbb{R}^{3 \times 1}$: gradientes respecto a las preactivaciones de las capas ocultas.
+    \item $\boldsymbol{\Omega}_k^T \frac{\partial \ell_i}{\partial \mathbf{f}_k}$: proyección del gradiente desde la capa siguiente hacia la capa previa.
+    \item $\sigma(\mathbf{f}_{k-1}) \odot (\mathbf{1} - \sigma(\mathbf{f}_{k-1})) \in \mathbb{R}^{D_{k-1} \times 1}$: derivada local de la función sigmoide en cada neurona.
+    \item $\odot$: multiplicación elemento a elemento (producto de Hadamard).
+\end{itemize}
+
+\subsection*{Cálculo explícito del paso de optimización sobre el batch}
+
+Para realizar un paso completo de entrenamiento con tasa de aprendizaje $\alpha = 1.0$, seguimos cuatro fases:
+\begin{enumerate}
+    \item \textbf{Paso hacia adelante:} Calculamos la salida de cada dato y registramos su pérdida individual.
+    \item \textbf{Paso hacia atrás:} Usamos la regla de la cadena para obtener los gradientes de cada dato sin modificar los pesos todavía.
+    \item \textbf{Promedio del \textit{batch}:} Promediamos los gradientes obtenidos en las tres muestras.
+    \item \textbf{Actualización de parámetros:} Modificamos el vector global de parámetros $\boldsymbol{\theta} = \{\boldsymbol{\beta}_0, \boldsymbol{\Omega}_0, \boldsymbol{\beta}_1, \boldsymbol{\Omega}_1, \boldsymbol{\beta}_2, \boldsymbol{\Omega}_2\}$ restando el gradiente promedio.
+\end{enumerate}
+
+A continuación, mostramos los cálculos numéricos paso a paso para cada muestra:
+
+\subsubsection*{Dato 1: $\mathbf{x}^{(1)} = [1, 1]^T, \quad y^{(1)} = 1$}
+\begin{itemize}
+    \item \textbf{Paso hacia adelante:}
+    \begin{align*}
+    \mathbf{f}_0^{(1)} &= \begin{bmatrix} 0.3 \\ 0.7 \\ 0.1 \end{bmatrix} + \begin{bmatrix} 0.2(1) - 0.1(1) \\ 0.5(1) + 0.6(1) \\ -1.3(1) + 1.2(1) \end{bmatrix} = \begin{bmatrix} 0.3 + 0.1 \\ 0.7 + 1.1 \\ 0.1 - 0.1 \end{bmatrix} = \begin{bmatrix} 0.4 \\ 1.8 \\ 0.0 \end{bmatrix} \\[0.12cm]
+    \mathbf{h}_1^{(1)} &= \begin{bmatrix} \sigma(0.4) \\ \sigma(1.8) \\ \sigma(0.0) \end{bmatrix} = \begin{bmatrix} \frac{1}{1+e^{-0.4}} \\ \frac{1}{1+e^{-1.8}} \\ \frac{1}{1+e^0} \end{bmatrix} = \begin{bmatrix} 0.5987 \\ 0.8581 \\ 0.5000 \end{bmatrix} \\[0.12cm]
+    \mathbf{f}_1^{(1)} &= \begin{bmatrix} -0.3 \\ 0.3 \end{bmatrix} + \begin{bmatrix} 1.3(0.5987) + 0.6(0.8581) - 0.7(0.5000) \\ -0.2(0.5987) + 0.1(0.8581) + 0.4(0.5000) \end{bmatrix} = \begin{bmatrix} -0.3 + 0.9432 \\ 0.3 + 0.1661 \end{bmatrix} = \begin{bmatrix} 0.6432 \\ 0.4661 \end{bmatrix} \\[0.12cm]
+    \mathbf{h}_2^{(1)} &= \begin{bmatrix} \sigma(0.6432) \\ \sigma(0.4661) \end{bmatrix} = \begin{bmatrix} 0.6555 \\ 0.6145 \end{bmatrix} \\[0.12cm]
+    f_2^{(1)} &= 0.2 + (-0.9)(0.6555) + (2.1)(0.6145) = 0.2 - 0.58995 + 1.29045 = 0.9004 \\[0.12cm]
+    \ell_1 &= (f_2^{(1)} - y^{(1)})^2 = (0.9004 - 1)^2 = (-0.09956)^2 = \mathbf{0.009914}
+    \end{align*}
+
+    \item \textbf{Paso hacia atrás:}
+    \begin{align*}
+    \frac{\partial \ell_1}{\partial f_2} &= 2(f_2^{(1)} - y^{(1)}) = 2(0.9004 - 1) = -0.19914 \implies \frac{\partial \ell_1}{\partial \boldsymbol{\beta}_2} = \mathbf{[-0.19914]} \\[0.12cm]
+    \frac{\partial \ell_1}{\partial \boldsymbol{\Omega}_2} &= \frac{\partial \ell_1}{\partial f_2} (\mathbf{h}_2^{(1)})^T = -0.19914 \begin{bmatrix} 0.6555 & 0.6145 \end{bmatrix} = \mathbf{\begin{bmatrix} -0.13053 & -0.12236 \end{bmatrix}} \\[0.12cm]
+    \frac{\partial \ell_1}{\partial \mathbf{f}_1} &= \big[ \mathbf{h}_2^{(1)} \odot (1 - \mathbf{h}_2^{(1)}) \big] \odot \left( \boldsymbol{\Omega}_2^T \frac{\partial \ell_1}{\partial f_2} \right) = \begin{bmatrix} 0.6555(0.3445) \\ 0.6145(0.3855) \end{bmatrix} \odot \left( \begin{bmatrix} -0.9 \\ 2.1 \end{bmatrix} (-0.19914) \right) \\
+    &= \begin{bmatrix} 0.22582 \\ 0.23690 \end{bmatrix} \odot \begin{bmatrix} 0.17923 \\ -0.41819 \end{bmatrix} = \mathbf{\begin{bmatrix} 0.04047 \\ -0.09907 \end{bmatrix}} = \frac{\partial \ell_1}{\partial \boldsymbol{\beta}_1} \\[0.12cm]
+    \frac{\partial \ell_1}{\partial \boldsymbol{\Omega}_1} &= \frac{\partial \ell_1}{\partial \mathbf{f}_1} (\mathbf{h}_1^{(1)})^T = \begin{bmatrix} 0.04047 \\ -0.09907 \end{bmatrix} \begin{bmatrix} 0.5987 & 0.8581 & 0.5000 \end{bmatrix} = \mathbf{\begin{bmatrix} 0.02423 & 0.03473 & 0.02024 \\ -0.05931 & -0.08502 & -0.04954 \end{bmatrix}} \\[0.12cm]
+    \frac{\partial \ell_1}{\partial \mathbf{f}_0} &= \big[ \mathbf{h}_1^{(1)} \odot (1 - \mathbf{h}_1^{(1)}) \big] \odot \left( \boldsymbol{\Omega}_1^T \frac{\partial \ell_1}{\partial \mathbf{f}_1} \right) = \begin{bmatrix} 0.5987(0.4013) \\ 0.8581(0.1419) \\ 0.5000(0.5000) \end{bmatrix} \odot \left( \begin{bmatrix} 1.3 & -0.2 \\ 0.6 & 0.1 \\ -0.7 & 0.4 \end{bmatrix} \begin{bmatrix} 0.04047 \\ -0.09907 \end{bmatrix} \right) \\
+    &= \begin{bmatrix} 0.24026 \\ 0.12176 \\ 0.25000 \end{bmatrix} \odot \begin{bmatrix} 0.07242 \\ 0.01437 \\ -0.06796 \end{bmatrix} = \mathbf{\begin{bmatrix} 0.01740 \\ 0.00175 \\ -0.01699 \end{bmatrix}} = \frac{\partial \ell_1}{\partial \boldsymbol{\beta}_0} \\[0.12cm]
+    \frac{\partial \ell_1}{\partial \boldsymbol{\Omega}_0} &= \frac{\partial \ell_1}{\partial \mathbf{f}_0} (\mathbf{x}^{(1)})^T = \begin{bmatrix} 0.01740 \\ 0.00175 \\ -0.01699 \end{bmatrix} \begin{bmatrix} 1 & 1 \end{bmatrix} = \mathbf{\begin{bmatrix} 0.01740 & 0.01740 \\ 0.00175 & 0.00175 \\ -0.01699 & -0.01699 \end{bmatrix}}
+    \end{align*}
+\end{itemize}
+
+\subsubsection*{Dato 2: $\mathbf{x}^{(2)} = [0, 2]^T, \quad y^{(2)} = 1$}
+\begin{itemize}
+    \item \textbf{Paso hacia adelante:}
+    \begin{align*}
+    \mathbf{f}_0^{(2)} &= \begin{bmatrix} 0.3 \\ 0.7 \\ 0.1 \end{bmatrix} + \begin{bmatrix} 0.2(0) - 0.1(2) \\ 0.5(0) + 0.6(2) \\ -1.3(0) + 1.2(2) \end{bmatrix} = \begin{bmatrix} 0.3 - 0.2 \\ 0.7 + 1.2 \\ 0.1 + 2.4 \end{bmatrix} = \begin{bmatrix} 0.1 \\ 1.9 \\ 2.5 \end{bmatrix} \implies \mathbf{h}_1^{(2)} = \begin{bmatrix} \sigma(0.1) \\ \sigma(1.9) \\ \sigma(2.5) \end{bmatrix} = \begin{bmatrix} 0.5250 \\ 0.8699 \\ 0.9241 \end{bmatrix} \\[0.12cm]
+    \mathbf{f}_1^{(2)} &= \begin{bmatrix} -0.3 \\ 0.3 \end{bmatrix} + \begin{bmatrix} 1.3(0.5250) + 0.6(0.8699) - 0.7(0.9241) \\ -0.2(0.5250) + 0.1(0.8699) + 0.4(0.9241) \end{bmatrix} = \begin{bmatrix} 0.2575 \\ 0.6517 \end{bmatrix} \implies \mathbf{h}_2^{(2)} = \begin{bmatrix} 0.5640 \\ 0.6574 \end{bmatrix} \\[0.12cm]
+    f_2^{(2)} &= 0.2 + (-0.9)(0.5640) + (2.1)(0.6574) = 1.0729, \quad \ell_2 = (1.0729 - 1)^2 = \mathbf{0.005312}
+    \end{align*}
+
+    \item \textbf{Paso hacia atrás:}
+    \begin{align*}
+    \frac{\partial \ell_2}{\partial f_2} &= 2(1.0729 - 1) = 0.14576 \implies \frac{\partial \ell_2}{\partial \boldsymbol{\beta}_2} = \mathbf{[0.14576]}, \quad \frac{\partial \ell_2}{\partial \boldsymbol{\Omega}_2} = \mathbf{\begin{bmatrix} 0.08221 & 0.09582 \end{bmatrix}} \\[0.12cm]
+    \frac{\partial \ell_2}{\partial \mathbf{f}_1} &= \begin{bmatrix} 0.24590 \\ 0.22522 \end{bmatrix} \odot \begin{bmatrix} -0.13118 \\ 0.30610 \end{bmatrix} = \mathbf{\begin{bmatrix} -0.03226 \\ 0.06894 \end{bmatrix}} = \frac{\partial \ell_2}{\partial \boldsymbol{\beta}_1} \\[0.12cm]
+    \frac{\partial \ell_2}{\partial \boldsymbol{\Omega}_1} &= \begin{bmatrix} -0.03226 \\ 0.06894 \end{bmatrix} \begin{bmatrix} 0.5250 & 0.8699 & 0.9241 \end{bmatrix} = \mathbf{\begin{bmatrix} -0.01694 & -0.02806 & -0.02981 \\ 0.03619 & 0.05997 & 0.06371 \end{bmatrix}} \\[0.12cm]
+    \frac{\partial \ell_2}{\partial \mathbf{f}_0} &= \begin{bmatrix} 0.24938 \\ 0.11317 \\ 0.07014 \end{bmatrix} \odot \begin{bmatrix} -0.05573 \\ -0.01246 \\ 0.05016 \end{bmatrix} = \mathbf{\begin{bmatrix} -0.01390 \\ -0.00141 \\ 0.00352 \end{bmatrix}} = \frac{\partial \ell_2}{\partial \boldsymbol{\beta}_0} \\[0.12cm]
+    \frac{\partial \ell_2}{\partial \boldsymbol{\Omega}_0} &= \begin{bmatrix} -0.01390 \\ -0.00141 \\ 0.00352 \end{bmatrix} \begin{bmatrix} 0 & 2 \end{bmatrix} = \mathbf{\begin{bmatrix} 0 & -0.02779 \\ 0 & -0.00282 \\ 0 & 0.00703 \end{bmatrix}}
+    \end{align*}
+\end{itemize}
+
+\subsubsection*{Dato 3: $\mathbf{x}^{(3)} = [-1, 1]^T, \quad y^{(3)} = 0$}
+\begin{itemize}
+    \item \textbf{Paso hacia adelante:}
+    \begin{align*}
+    \mathbf{f}_0^{(3)} &= \begin{bmatrix} 0.3 \\ 0.7 \\ 0.1 \end{bmatrix} + \begin{bmatrix} 0.2(-1) - 0.1(1) \\ 0.5(-1) + 0.6(1) \\ -1.3(-1) + 1.2(1) \end{bmatrix} = \begin{bmatrix} 0.3 - 0.3 \\ 0.7 + 0.1 \\ 0.1 + 2.5 \end{bmatrix} = \begin{bmatrix} 0.0 \\ 0.8 \\ 2.6 \end{bmatrix} \implies \mathbf{h}_1^{(3)} = \begin{bmatrix} \sigma(0.0) \\ \sigma(0.8) \\ \sigma(2.6) \end{bmatrix} = \begin{bmatrix} 0.5000 \\ 0.6900 \\ 0.9309 \end{bmatrix} \\[0.12cm]
+    \mathbf{f}_1^{(3)} &= \begin{bmatrix} -0.3 \\ 0.3 \end{bmatrix} + \begin{bmatrix} 1.3(0.5000) + 0.6(0.6900) - 0.7(0.9309) \\ -0.2(0.5000) + 0.1(0.6900) + 0.4(0.9309) \end{bmatrix} = \begin{bmatrix} 0.1124 \\ 0.6413 \end{bmatrix} \implies \mathbf{h}_2^{(3)} = \begin{bmatrix} 0.5281 \\ 0.6551 \end{bmatrix} \\[0.12cm]
+    f_2^{(3)} &= 0.2 + (-0.9)(0.5281) + (2.1)(0.6551) = 1.1004, \quad \ell_3 = (1.1004 - 0)^2 = \mathbf{1.210792}
+    \end{align*}
+
+    \item \textbf{Paso hacia atrás:}
+    \begin{align*}
+    \frac{\partial \ell_3}{\partial f_2} &= 2(1.1004 - 0) = 2.20072 \implies \frac{\partial \ell_3}{\partial \boldsymbol{\beta}_2} = \mathbf{[2.20072]}, \quad \frac{\partial \ell_3}{\partial \boldsymbol{\Omega}_2} = \mathbf{\begin{bmatrix} 1.16213 & 1.44160 \end{bmatrix}} \\[0.12cm]
+    \frac{\partial \ell_3}{\partial \mathbf{f}_1} &= \begin{bmatrix} 0.24921 \\ 0.22594 \end{bmatrix} \odot \begin{bmatrix} -1.98065 \\ 4.62151 \end{bmatrix} = \mathbf{\begin{bmatrix} -0.49360 \\ 1.04426 \end{bmatrix}} = \frac{\partial \ell_3}{\partial \boldsymbol{\beta}_1} \\[0.12cm]
+    \frac{\partial \ell_3}{\partial \boldsymbol{\Omega}_1} &= \begin{bmatrix} -0.49360 \\ 1.04426 \end{bmatrix} \begin{bmatrix} 0.5000 & 0.6900 & 0.9309 \end{bmatrix} = \mathbf{\begin{bmatrix} -0.24680 & -0.34057 & -0.45947 \\ 0.52213 & 0.72052 & 0.97207 \end{bmatrix}} \\[0.12cm]
+    \frac{\partial \ell_3}{\partial \mathbf{f}_0} &= \begin{bmatrix} 0.25000 \\ 0.21390 \\ 0.06433 \end{bmatrix} \odot \begin{bmatrix} -0.85053 \\ -0.19173 \\ 0.76322 \end{bmatrix} = \mathbf{\begin{bmatrix} -0.21263 \\ -0.04101 \\ 0.04912 \end{bmatrix}} = \frac{\partial \ell_3}{\partial \boldsymbol{\beta}_0} \\[0.12cm]
+    \frac{\partial \ell_3}{\partial \boldsymbol{\Omega}_0} &= \begin{bmatrix} -0.21263 \\ -0.04101 \\ 0.04912 \end{bmatrix} \begin{bmatrix} -1 & 1 \end{bmatrix} = \mathbf{\begin{bmatrix} 0.21263 & -0.21263 \\ 0.04101 & -0.04101 \\ -0.04912 & 0.04912 \end{bmatrix}}
+    \end{align*}
+\end{itemize}
+
+\subsubsection*{Promedio del batch y actualización con $\alpha = 1.0$}
+
+Con los gradientes calculados para los tres datos, sacamos el promedio exacto para saber en qué dirección ajustar los parámetros:
+\[
+\nabla_{\boldsymbol{\theta}} L = \frac{1}{3} \sum_{i=1}^3 \nabla_{\boldsymbol{\theta}} \ell_i = \frac{1}{3} \Big( \underbrace{\nabla_{\boldsymbol{\theta}} \ell_1}_{\text{Dato 1}} + \underbrace{\nabla_{\boldsymbol{\theta}} \ell_2}_{\text{Dato 2}} + \underbrace{\nabla_{\boldsymbol{\theta}} \ell_3}_{\text{Dato 3}} \Big)
+\]
+Sumamos los términos de los tres datos y dividimos entre 3 para cada componente:
+\begin{align*}
+\frac{\partial L}{\partial \boldsymbol{\beta}_2} &= \frac{1}{3}\left( \underbrace{[-0.19914]}_{\text{Dato 1}} + \underbrace{[0.14576]}_{\text{Dato 2}} + \underbrace{[2.20072]}_{\text{Dato 3}} \right) = \frac{[2.14734]}{3} = \mathbf{[0.71578]} \\[0.2cm]
+\frac{\partial L}{\partial \boldsymbol{\Omega}_2} &= \frac{1}{3}\left( \underbrace{[-0.13053, \; -0.12236]}_{\text{Dato 1}} + \underbrace{[0.08221, \; 0.09582]}_{\text{Dato 2}} + \underbrace{[1.16213, \; 1.44160]}_{\text{Dato 3}} \right) = \mathbf{\begin{bmatrix} 0.37127 & 0.47169 \end{bmatrix}} \\[0.2cm]
+\frac{\partial L}{\partial \boldsymbol{\beta}_1} &= \frac{1}{3}\left( \underbrace{\begin{bmatrix} 0.04047 \\ -0.09907 \end{bmatrix}}_{\text{Dato 1}} + \underbrace{\begin{bmatrix} -0.03226 \\ 0.06894 \end{bmatrix}}_{\text{Dato 2}} + \underbrace{\begin{bmatrix} -0.49360 \\ 1.04426 \end{bmatrix}}_{\text{Dato 3}} \right) = \mathbf{\begin{bmatrix} -0.16180 \\ 0.33805 \end{bmatrix}} \\[0.2cm]
+\frac{\partial L}{\partial \boldsymbol{\Omega}_1} &= \frac{1}{3}\Bigg( \underbrace{\begin{bmatrix} 0.02423 & 0.03473 & 0.02024 \\ -0.05931 & -0.08502 & -0.04954 \end{bmatrix}}_{\text{Dato 1}} + \underbrace{\begin{bmatrix} -0.01694 & -0.02806 & -0.02981 \\ 0.03619 & 0.05997 & 0.06371 \end{bmatrix}}_{\text{Dato 2}} \\
+&\hspace{1cm} + \underbrace{\begin{bmatrix} -0.24680 & -0.34057 & -0.45947 \\ 0.52213 & 0.72052 & 0.97207 \end{bmatrix}}_{\text{Dato 3}} \Bigg) = \mathbf{\begin{bmatrix} -0.07983 & -0.11130 & -0.15635 \\ 0.16634 & 0.23182 & 0.32875 \end{bmatrix}} \\[0.2cm]
+\frac{\partial L}{\partial \boldsymbol{\beta}_0} &= \frac{1}{3}\left( \underbrace{\begin{bmatrix} 0.01740 \\ 0.00175 \\ -0.01699 \end{bmatrix}}_{\text{Dato 1}} + \underbrace{\begin{bmatrix} -0.01390 \\ -0.00141 \\ 0.00352 \end{bmatrix}}_{\text{Dato 2}} + \underbrace{\begin{bmatrix} -0.21263 \\ -0.04101 \\ 0.04912 \end{bmatrix}}_{\text{Dato 3}} \right) = \mathbf{\begin{bmatrix} -0.06971 \\ -0.01356 \\ 0.01188 \end{bmatrix}} \\[0.2cm]
+\frac{\partial L}{\partial \boldsymbol{\Omega}_0} &= \frac{1}{3}\Bigg( \underbrace{\begin{bmatrix} 0.01740 & 0.01740 \\ 0.00175 & 0.00175 \\ -0.01699 & -0.01699 \end{bmatrix}}_{\text{Dato 1}} + \underbrace{\begin{bmatrix} 0 & -0.02779 \\ 0 & -0.00282 \\ 0 & 0.00703 \end{bmatrix}}_{\text{Dato 2}} + \underbrace{\begin{bmatrix} 0.21263 & -0.21263 \\ 0.04101 & -0.04101 \\ -0.04912 & 0.04912 \end{bmatrix}}_{\text{Dato 3}} \Bigg) \\
+&= \mathbf{\begin{bmatrix} 0.07668 & -0.07434 \\ 0.01425 & -0.01403 \\ -0.02204 & 0.01305 \end{bmatrix}}
+\end{align*}
+
+Con la tasa de aprendizaje $\alpha = 1.0$, actualizamos los parámetros restando este gradiente promedio a los valores anteriores ($\boldsymbol{\theta}^{(t+1)} = \boldsymbol{\theta}^{(t)} - 1.0 \cdot \nabla_{\boldsymbol{\theta}} L$):
+
+\begin{align*}
+\boldsymbol{\beta}_0^{\text{nuevo}} &= \begin{bmatrix} 0.3 \\ 0.7 \\ 0.1 \end{bmatrix} - 1.0 \begin{bmatrix} -0.06971 \\ -0.01356 \\ 0.01188 \end{bmatrix} = \mathbf{\begin{bmatrix} 0.36971 \\ 0.71356 \\ 0.08812 \end{bmatrix}} \\[0.2cm]
+\boldsymbol{\Omega}_0^{\text{nuevo}} &= \begin{bmatrix} 0.2 & -0.1 \\ 0.5 & 0.6 \\ -1.3 & 1.2 \end{bmatrix} - 1.0 \begin{bmatrix} 0.07668 & -0.07434 \\ 0.01425 & -0.01403 \\ -0.02204 & 0.01305 \end{bmatrix} = \mathbf{\begin{bmatrix} 0.12332 & -0.02566 \\ 0.48575 & 0.61403 \\ -1.27796 & 1.18695 \end{bmatrix}} \\[0.2cm]
+\boldsymbol{\beta}_1^{\text{nuevo}} &= \begin{bmatrix} -0.3 \\ 0.3 \end{bmatrix} - 1.0 \begin{bmatrix} -0.16180 \\ 0.33805 \end{bmatrix} = \mathbf{\begin{bmatrix} -0.13820 \\ -0.03805 \end{bmatrix}} \\[0.2cm]
+\boldsymbol{\Omega}_1^{\text{nuevo}} &= \begin{bmatrix} 1.3 & 0.6 & -0.7 \\ -0.2 & 0.1 & 0.4 \end{bmatrix} - 1.0 \begin{bmatrix} -0.07983 & -0.11130 & -0.15635 \\ 0.16634 & 0.23182 & 0.32875 \end{bmatrix} = \mathbf{\begin{bmatrix} 1.37983 & 0.71130 & -0.54365 \\ -0.36634 & -0.13182 & 0.07125 \end{bmatrix}} \\[0.2cm]
+\boldsymbol{\beta}_2^{\text{nuevo}} &= [0.2] - 1.0 [0.71578] = \mathbf{[-0.51578]} \\[0.2cm]
+\boldsymbol{\Omega}_2^{\text{nuevo}} &= \begin{bmatrix} -0.9 & 2.1 \end{bmatrix} - 1.0 \begin{bmatrix} 0.37127 & 0.47169 \end{bmatrix} = \mathbf{\begin{bmatrix} -1.27127 & 1.62831 \end{bmatrix}}
+\end{align*}
+
+Como detalle adicional, la pérdida inicial promedio de los tres datos fue $L^{(0)} = \frac{0.009914 + 0.005312 + 1.210792}{3} \approx 0.4087$. Al aplicar este primer paso con $\alpha = 1.0$, el avance es bastante grande para los valores que maneja la red y hace que la salida se pase de largo (\textit{overshooting}). En la práctica, si usamos una tasa más pequeña y habitual como $\alpha \le 0.2$, el error va bajando de forma constante paso a paso.
+
+\newpage
+\section*{II-B. Algoritmos de optimización}
+
+Para entender cómo se comportan los optimizadores al entrenar una red neuronal, usamos la superficie del enunciado como función objetivo:
+\[
+f(x, y) = \frac{\sin\left(0.8(x^2 + y^2)\right)}{(x^2 + y^2)^{0.9}}
+\]
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{images/figura_2_superficie.png}
+    \caption{Superficie objetivo y efecto del ruido. A la izquierda se ve el relieve tridimensional $f(x, y)$ con sus anillos ondulados. A la derecha se muestra cómo baja el error al entrenar la red con tres niveles de ruido ($\sigma = 0.0$, $\sigma = 0.1$ y $\sigma = 0.3$).}
+    \label{fig:superficie}
+\end{figure}
+
+A la izquierda en la Figura~\ref{fig:superficie} vemos que esta función tiene un pico en el centro y varios anillos de valles y colinas a su alrededor, lo que genera zonas donde un optimizador simple se puede frenar.
+
+\subsection*{¿Cuál es el impacto del parámetro de ruido en el proceso de optimización?}
+
+El ruido viene de las variaciones de los datos ($\tilde{y} = f(x, y) + \epsilon$) y de calcular el gradiente con \textit{mini-batches}. En la gráfica de la derecha de la Figura~\ref{fig:superficie} se nota su doble efecto:
+\begin{itemize}\itemsep0.1em
+    \item \textbf{Al principio ayuda a explorar:} Las pequeñas sacudidas del ruido hacen que la red no se quede atascada en el primer valle que encuentre ni en zonas planas, permitiéndole saltar pequeños bordes y buscar mejores soluciones.
+    \item \textbf{Al final impide ajustar con precisión:} Si el ruido es muy fuerte (curva roja), la red empieza a bailar alrededor del mínimo y el error no puede bajar más allá del nivel de ruido. Por eso, en la práctica se va bajando la tasa de aprendizaje poco a poco para explorar al inicio y asentarse bien al final.
+\end{itemize}
+
+\subsection*{¿Cómo se diferencia el método del descenso del gradiente con el descenso estocástico y las versiones aceleradas?}
+
+Para comparar los optimizadores, entrenamos la red con cuatro métodos distintos, como se ve a la izquierda en la Figura~\ref{fig:optimizadores}:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{images/figura_3_optimizadores.png}
+    \caption{Comparación de optimizadores y tamaño de la red. A la izquierda se muestra la rapidez con la que baja el error en cada método. A la derecha se compara el entrenamiento usando una red compacta, una intermedia y una grande.}
+    \label{fig:optimizadores}
+\end{figure}
+
+Al analizar el comportamiento de cada método, encontramos diferencias fundamentales en su forma de cálculo, velocidad y estabilidad:
+\begin{itemize}\itemsep0.1em
+    \item \textbf{Descenso del gradiente:} Calcula el gradiente exacto usando todo el conjunto de entrenamiento para dar un solo paso. Aunque su trayectoria es muy suave y sin ruido, dar un único ajuste por época lo vuelve demasiado lento e ineficiente en tiempo real, además de que puede quedarse frenado con facilidad si cae en zonas planas o en mínimos locales.
+    \item \textbf{Descenso del gradiente estocástico:} En vez de esperar a revisar todos los datos, divide el conjunto en grupos pequeños de 32 muestras y ajusta los pesos en cada grupo. Esto le permite hacer decenas de correcciones rápidas en una sola época, bajando el error mucho más rápido. Las pequeñas variaciones que introduce cada grupo generan sacudidas que le ayudan a no quedarse atascado en valles poco profundos.
+    \item \textbf{Versiones con Momentum:} El descenso estocástico suele rebotar de lado a lado cuando el terreno tiene paredes muy empinadas y un fondo plano. Momentum corrige esto guardando una velocidad con los pasos anteriores. Como los rebotes van en direcciones opuestas se cancelan entre sí, mientras que el avance hacia adelante se va sumando, logrando que la red baje por el valle con mucha más rapidez y sin perder empuje en zonas planas.
+    \item \textbf{Versiones aceleradas adaptativas como Adam:} Da un paso más allá al combinar el impulso de Momentum con un ajuste automático del paso para cada peso por separado. Si un peso viene cambiando con saltos muy bruscos, reduce su paso para no pasarse; si un peso casi no cambia en una zona plana, agranda su paso para avanzar más rápido. Gracias a esta doble adaptación, es el método más rápido, directo y estable para llegar al mínimo.
+\end{itemize}
+
+\subsection*{¿Cómo impacta la dimensión de la red neuronal en el rendimiento del optimizador?}
+
+A la derecha en la Figura~\ref{fig:optimizadores} comparamos tres tamaños de red (una compacta, una intermedia y una grande):
+\begin{itemize}\itemsep0.1em
+    \item \textbf{Si la red es muy pequeña (curva morada):} Tiene muy pocos pesos y casi no tiene caminos para moverse. Si cae en un hueco con error alto, no tiene por dónde salir y se estanca por falta de capacidad.
+    \item \textbf{Si la red es más grande (curvas azul y verde):} Al tener más neuronas y miles de pesos, el optimizador tiene muchísimos caminos libres. Es casi imposible que el paso se cierre en todas las direcciones a la vez, por lo que casi siempre encuentra una salida hacia abajo para seguir reduciendo el error.
+\end{itemize}
+En resumen, hacer la red más grande facilita que el optimizador encuentre una buena solución en pocas pasadas, aunque cada paso tome un poco más de cálculo en la computadora.
+
+\subsection*{Diferencia entre épocas y tiempo de convergencia de los algoritmos}
+
+La diferencia principal entre estos dos conceptos está en lo que mide cada uno:
+
+Una época es una medida de datos. Indica cuántas veces el modelo ha visto el conjunto de entrenamiento completo, pero no dice cuánto tiempo de reloj ni cuántas operaciones le tomó a la computadora hacer esa pasada.
+
+El tiempo de convergencia es una medida de tiempo real. Representa los segundos o minutos físicos que tarda el algoritmo en reducir el error y encontrar una buena solución.
+
+La diferencia práctica entre ambos se hace evidente al comparar los algoritmos:
+\begin{itemize}\itemsep0.1em
+    \item En el descenso del gradiente, cada época realiza un único ajuste usando todos los datos a la vez. Aunque en la teoría parezca que avanza época por época, cada una de esas pasadas es muy pesada y lenta, lo que hace que su tiempo de convergencia real sea muy alto.
+    \item En el descenso del gradiente estocástico y en Adam, los datos se dividen en grupos pequeños de 32 muestras. En una sola época la red realiza decenas de correcciones rápidas. Por eso, su tiempo de convergencia real es mucho más corto, logrando un error mínimo en una fracción del tiempo de reloj.
+\end{itemize}
+
+En definitiva, las épocas solo indican cuántas veces se revisaron los datos, mientras que el tiempo de convergencia refleja la rapidez real del entrenamiento.
+
+\newpage
+\section*{II-C. Otros algoritmos de optimización}
+
+\subsection*{AdamW}
+
+Cuando usamos el optimizador Adam tradicional con penalización de pesos para evitar que crezcan demasiado, esa penalización se le suma directo al gradiente y luego se divide entre la velocidad del paso. Esto hace que los pesos que cambian rápido se penalicen menos de lo que deberían. AdamW soluciona esto separando las dos cosas: calcula el paso de Adam de forma normal y luego le resta la penalización de pesos por separado y de manera directa a los parámetros:
+\begin{gather*}
+\mathbf{m}_t = \beta_1 \mathbf{m}_{t-1} + (1 - \beta_1) \mathbf{g}_t, \quad \hat{\mathbf{m}}_t = \frac{\mathbf{m}_t}{1 - \beta_1^t} \\
+\mathbf{v}_t = \beta_2 \mathbf{v}_{t-1} + (1 - \beta_2) \mathbf{g}_t^2, \quad \hat{\mathbf{v}}_t = \frac{\mathbf{v}_t}{1 - \beta_2^t} \\
+\boldsymbol{\theta}_t = \boldsymbol{\theta}_{t-1} - \alpha_t \left( \frac{\hat{\mathbf{m}}_t}{\sqrt{\hat{\mathbf{v}}_t} + \epsilon} + \lambda \boldsymbol{\theta}_{t-1} \right)
+\end{gather*}
+
+\subsection*{AdaDelta}
+
+Este método busca mejorar a AdaGrad, que tenía el problema de que sumaba todos los gradientes viejos hasta que el paso se volvía casi cero y la red dejaba de aprender. AdaDelta cambia esa suma infinita por un promedio de los gradientes más recientes y, además, calcula otro promedio de cuánto se han venido moviendo los pesos en los pasos anteriores. Al comparar ambos valores, el tamaño del paso se ajusta solo y ya no hace falta elegir a mano una tasa de aprendizaje:
+\begin{gather*}
+E[\mathbf{g}^2]_t = \rho E[\mathbf{g}^2]_{t-1} + (1 - \rho) \mathbf{g}_t^2, \quad \text{RMS}[\mathbf{g}]_t = \sqrt{E[\mathbf{g}^2]_t + \epsilon} \\
+\Delta \boldsymbol{\theta}_t = - \frac{\text{RMS}[\Delta \boldsymbol{\theta}]_{t-1}}{\text{RMS}[\mathbf{g}]_t} \odot \mathbf{g}_t \\
+E[\Delta \boldsymbol{\theta}^2]_t = \rho E[\Delta \boldsymbol{\theta}^2]_{t-1} + (1 - \rho) \Delta \boldsymbol{\theta}_t^2, \quad \boldsymbol{\theta}_t = \boldsymbol{\theta}_{t-1} + \Delta \boldsymbol{\theta}_t
+\end{gather*}
+
+\subsection*{RMSProp}
+
+RMSProp busca que cada peso aprenda a su propia velocidad. Para eso, divide cada gradiente entre el promedio de sus valores al cuadrado recientes. Si un peso viene cambiando con saltos muy bruscos, el método achica su paso para que no se pase de largo; pero si un peso casi no cambia y está en una zona plana, agranda el paso para que avance más rápido:
+\begin{gather*}
+\mathbf{v}_t = \beta \mathbf{v}_{t-1} + (1 - \beta) \mathbf{g}_t^2 \\
+\boldsymbol{\theta}_t = \boldsymbol{\theta}_{t-1} - \frac{\alpha}{\sqrt{\mathbf{v}_t} + \epsilon} \odot \mathbf{g}_t
+\end{gather*}
+
+\subsection*{L-BFGS}
+
+A diferencia de los métodos anteriores que solo miran la pendiente del terreno, L-BFGS también aprovecha cómo se curva el suelo usando derivadas de segundo orden. Su objetivo es calcular una dirección de descenso más precisa multiplicando el gradiente por la inversa de la matriz de curvatura (matriz Hessiana $\mathbf{H}_t^{-1}$), actualizando los parámetros como:
+\begin{gather*}
+\boldsymbol{\theta}_t = \boldsymbol{\theta}_{t-1} + \alpha_t \mathbf{d}_t, \quad \text{donde } \mathbf{d}_t = - \mathbf{H}_t^{-1} \mathbf{g}_t
+\end{gather*}
+Como calcular e invertir una matriz gigante para miles de pesos ocuparía demasiada memoria, la versión con memoria limitada solo guarda los últimos $m$ cambios de posición y de gradientes:
+\begin{gather*}
+\mathbf{s}_k = \boldsymbol{\theta}_{k+1} - \boldsymbol{\theta}_k, \quad \mathbf{y}_k = \mathbf{g}_{k+1} - \mathbf{g}_k, \quad \rho_k = \frac{1}{\mathbf{y}_k^T \mathbf{s}_k}
+\end{gather*}
+Con estos pocos vectores y mediante un algoritmo de dos bucles rápidos (\textit{two-loop recursion}), L-BFGS calcula la dirección óptima $\mathbf{d}_t$ en tiempo lineal sin necesidad de construir la matriz completa, ajustando el tamaño del paso $\alpha_t$ con una búsqueda de línea.
+
+\newpage
+\section*{II-D. Inicialización}
+
+\subsection*{Derivación de la inicialización de He y supuesto de activación}
+
+Consideramos la red de la Figura~\ref{fig:red} con los sesgos en cero ($\beta_i = 0$) y los pesos inicializados al azar siguiendo una distribución normal $\Omega_{ij} \sim \mathcal{N}(0, \sigma_\Omega^2)$. Siguiendo la sección 7.5 del libro (ecuación 7.31), buscamos que la varianza de las señales no cambie al pasar de una capa a otra ($\operatorname{Var}[f] = \operatorname{Var}[f']$). Para una neurona con $D_h$ entradas ($f_i = \sum_{j=1}^{D_h} \Omega_{ij} h_j$), la varianza de su salida es $\operatorname{Var}[f_i] = D_h \sigma_\Omega^2 \mathbb{E}[h_j^2]$.
+
+\textbf{¿Qué supuesto sobre la función de activación se utiliza en esta derivación?} Se asume que antes de pasar por la activación, las señales están centradas en cero de forma simétrica ($\mathbb{E}[f'_j] = 0$). Como la función ReLU ($h = \max(0, f')$) convierte en cero todos los números negativos, apaga exactamente la mitad de los datos ($\mathbb{P}(f' < 0) = 0.5$). Esto hace que la varianza se reduzca a la mitad: $\mathbb{E}[h_j^2] = \frac{1}{2}\operatorname{Var}[f']$. Para compensar esa mitad que se pierde y mantener la varianza constante, igualamos el factor de escala a 1:
+\begin{gather*}
+\operatorname{Var}[f] = D_h \sigma_\Omega^2 \left( \frac{1}{2} \operatorname{Var}[f'] \right) = \left( \frac{1}{2} D_h \sigma_\Omega^2 \right) \operatorname{Var}[f'] \implies \frac{1}{2}D_h \sigma_\Omega^2 = 1 \implies \mathbf{\sigma_\Omega^2 = \frac{2}{D_h}} \implies \mathbf{\sigma_\Omega = \sqrt{\frac{2}{D_h}}}
+\end{gather*}
+
+\subsection*{Inicialización Xavier / Glorot para activación sigmoide y comparación con He}
+
+\textbf{¿Por qué el supuesto anterior deja de ser válido en la Figura 1?} La red de la Figura~\ref{fig:red} usa la función sigmoide $\sigma(z) = \frac{1}{1 + e^{-z}}$ en lugar de ReLU. El supuesto de He ya no sirve porque la sigmoide nunca apaga ninguna neurona (siempre da números positivos entre 0 y 1 con promedio cerca de 0.5), así que la varianza no se divide entre dos. Cerca de cero la sigmoide es suave y casi una línea recta, por lo que $\operatorname{Var}[h] \approx \operatorname{Var}[f']$.
+
+\textbf{Derivación de la varianza de Xavier ($\sigma_\Omega^2 = \frac{2}{D_{\text{in}} + D_{\text{out}}}$):} Para que la varianza no cambie al avanzar hacia adelante necesitamos $\sigma_\Omega^2 = \frac{1}{D_{\text{in}}}$, y para que los gradientes tampoco cambien al retroceder hacia atrás necesitamos $\sigma_\Omega^2 = \frac{1}{D_{\text{out}}}$. Como casi siempre la capa tiene un número distinto de entradas y salidas ($D_{\text{in}} \neq D_{\text{out}}$), Xavier y Glorot proponen usar el promedio armónico de ambas condiciones:
+\begin{gather*}
+\sigma_\Omega^2 = \frac{2}{\frac{1}{\sigma_{\text{fwd}}^2} + \frac{1}{\sigma_{\text{bwd}}^2}} = \mathbf{\frac{2}{D_{\text{in}} + D_{\text{out}}}} \implies \mathbf{\sigma_\Omega = \sqrt{\frac{2}{D_{\text{in}} + D_{\text{out}}}}}
+\end{gather*}
+
+\textbf{¿Por qué Xavier promedia la entrada y la salida mientras que He solo usa la de entrada?} En ReLU, como la mitad de las neuronas se apagan tanto al ir hacia adelante como al volver hacia atrás con los gradientes, el factor 2 que pusimos en la entrada balancea automáticamente los dos sentidos. En la sigmoide ninguna neurona se apaga; por eso, si entran y salen cantidades distintas de datos, es obligatorio promediar ambas dimensiones para lograr un equilibrio.
+
+\subsection*{Cálculo numérico de $\sigma_\Omega$ según He y Xavier para la red de la Figura 1}
+
+Con estas fórmulas, calculamos el valor exacto de $\sigma_\Omega$ para cada capa de nuestra red ($2 \to 3 \to 2 \to 1$):
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{0.88}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Capa} & $D_{\text{in}}$ & $D_{\text{out}}$ & \textbf{Fórmula de He} & \textbf{Fórmula de Xavier} & \textbf{Valores numéricos} \\
+\midrule
+Capa 0 ($\boldsymbol{\Omega}_0$) & 2 & 3 & $\sqrt{2/2} = 1.0$ & $\sqrt{2/(2+3)} = \sqrt{0.4}$ & $\sigma_{\text{He}} = \mathbf{1.0000}, \; \sigma_{\text{Xavier}} \approx \mathbf{0.6325}$ \\
+Capa 1 ($\boldsymbol{\Omega}_1$) & 3 & 2 & $\sqrt{2/3} \approx 0.8165$ & $\sqrt{2/(3+2)} = \sqrt{0.4}$ & $\sigma_{\text{He}} \approx \mathbf{0.8165}, \; \sigma_{\text{Xavier}} \approx \mathbf{0.6325}$ \\
+Capa 2 / Salida ($\boldsymbol{\Omega}_2$) & 2 & 1 & $\sqrt{2/2} = 1.0$ & $\sqrt{2/(2+1)} = \sqrt{2/3}$ & $\sigma_{\text{He}} = \mathbf{1.0000}, \; \sigma_{\text{Xavier}} \approx \mathbf{0.8165}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{Comportamiento en redes profundas ($K \ge 20$ capas) y fenómenos de gradiente}
+
+Modificando el Notebook 7.3 construimos una red profunda de 20 capas y analizamos qué pasa con la varianza al cambiar el tamaño de los pesos iniciales:
+\begin{itemize}\itemsep0.05em
+    \item \textbf{1. Con $\sigma_\Omega^2$ demasiado pequeña ($\gamma < 1$):} En cada capa las señales se van achicando más y más hasta volverse casi cero ($\operatorname{Var}[f_k] \to 0$). Esto produce el \textbf{desvanecimiento de gradientes} (\textit{vanishing gradients}), donde los ajustes son tan diminutos que las primeras capas no aprenden nada.
+    \item \textbf{2. Con $\sigma_\Omega^2$ demasiado grande ($\gamma > 1$):} Las señales se multiplican y crecen sin control hasta valores enormes ($\operatorname{Var}[f_k] \to \infty$). Esto produce la \textbf{explosión de gradientes} (\textit{exploding gradients}), saturando las neuronas y rompiendo los cálculos en la computadora (\textit{NaN}).
+    \item \textbf{3. Con He o Xavier bien calibrados ($\gamma \approx 1$):} La varianza se mantiene estable y pareja en las 20 capas, permitiendo que tanto los datos como los gradientes fluyan sin problemas por toda la red.
+\end{itemize}
+
+\end{document}
