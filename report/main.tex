@@ -63,7 +63,7 @@
 
 \begin{figure}[H]
     \centering
-    \includegraphics[height=3.0cm, keepaspectratio]{images/figura_1.png}
+    \includegraphics[height=2.8cm, keepaspectratio]{images/figura_1.png}
     \caption{Arquitectura de la red neuronal $f: \mathbb{R}^2 \to \mathbb{R}$. Nodos negros: entradas $x_1, x_2$; nodos verdes: sesgos unitarios; nodos naranjas: capas ocultas con activación sigmoide $\sigma$; nodo rojo: salida lineal $y = f_2$.}
     \label{fig:red}
 \end{figure}
@@ -298,32 +298,22 @@ Sumamos los términos de los tres datos y dividimos entre 3 para cada componente
 
 Con la tasa de aprendizaje $\alpha = 1.0$, actualizamos los parámetros restando este gradiente promedio a los valores anteriores ($\boldsymbol{\theta}^{(t+1)} = \boldsymbol{\theta}^{(t)} - 1.0 \cdot \nabla_{\boldsymbol{\theta}} L$):
 
+{\setlength{\abovedisplayskip}{2pt}\setlength{\belowdisplayskip}{2pt}\setlength{\jot}{0pt}
 \begin{align*}
-\boldsymbol{\beta}_0^{\text{nuevo}} &= \begin{bmatrix} 0.3 \\ 0.7 \\ 0.1 \end{bmatrix} - 1.0 \begin{bmatrix} -0.06971 \\ -0.01356 \\ 0.01188 \end{bmatrix} = \mathbf{\begin{bmatrix} 0.36971 \\ 0.71356 \\ 0.08812 \end{bmatrix}} \\[0.2cm]
-\boldsymbol{\Omega}_0^{\text{nuevo}} &= \begin{bmatrix} 0.2 & -0.1 \\ 0.5 & 0.6 \\ -1.3 & 1.2 \end{bmatrix} - 1.0 \begin{bmatrix} 0.07668 & -0.07434 \\ 0.01425 & -0.01403 \\ -0.02204 & 0.01305 \end{bmatrix} = \mathbf{\begin{bmatrix} 0.12332 & -0.02566 \\ 0.48575 & 0.61403 \\ -1.27796 & 1.18695 \end{bmatrix}} \\[0.2cm]
-\boldsymbol{\beta}_1^{\text{nuevo}} &= \begin{bmatrix} -0.3 \\ 0.3 \end{bmatrix} - 1.0 \begin{bmatrix} -0.16180 \\ 0.33805 \end{bmatrix} = \mathbf{\begin{bmatrix} -0.13820 \\ -0.03805 \end{bmatrix}} \\[0.2cm]
-\boldsymbol{\Omega}_1^{\text{nuevo}} &= \begin{bmatrix} 1.3 & 0.6 & -0.7 \\ -0.2 & 0.1 & 0.4 \end{bmatrix} - 1.0 \begin{bmatrix} -0.07983 & -0.11130 & -0.15635 \\ 0.16634 & 0.23182 & 0.32875 \end{bmatrix} = \mathbf{\begin{bmatrix} 1.37983 & 0.71130 & -0.54365 \\ -0.36634 & -0.13182 & 0.07125 \end{bmatrix}} \\[0.2cm]
-\boldsymbol{\beta}_2^{\text{nuevo}} &= [0.2] - 1.0 [0.71578] = \mathbf{[-0.51578]} \\[0.2cm]
+\boldsymbol{\beta}_0^{\text{nuevo}} &= \begin{bmatrix} 0.3 \\ 0.7 \\ 0.1 \end{bmatrix} - 1.0 \begin{bmatrix} -0.06971 \\ -0.01356 \\ 0.01188 \end{bmatrix} = \mathbf{\begin{bmatrix} 0.36971 \\ 0.71356 \\ 0.08812 \end{bmatrix}} \\[0.03cm]
+\boldsymbol{\Omega}_0^{\text{nuevo}} &= \begin{bmatrix} 0.2 & -0.1 \\ 0.5 & 0.6 \\ -1.3 & 1.2 \end{bmatrix} - 1.0 \begin{bmatrix} 0.07668 & -0.07434 \\ 0.01425 & -0.01403 \\ -0.02204 & 0.01305 \end{bmatrix} = \mathbf{\begin{bmatrix} 0.12332 & -0.02566 \\ 0.48575 & 0.61403 \\ -1.27796 & 1.18695 \end{bmatrix}} \\[0.03cm]
+\boldsymbol{\beta}_1^{\text{nuevo}} &= \begin{bmatrix} -0.3 \\ 0.3 \end{bmatrix} - 1.0 \begin{bmatrix} -0.16180 \\ 0.33805 \end{bmatrix} = \mathbf{\begin{bmatrix} -0.13820 \\ -0.03805 \end{bmatrix}} \\[0.03cm]
+\boldsymbol{\Omega}_1^{\text{nuevo}} &= \begin{bmatrix} 1.3 & 0.6 & -0.7 \\ -0.2 & 0.1 & 0.4 \end{bmatrix} - 1.0 \begin{bmatrix} -0.07983 & -0.11130 & -0.15635 \\ 0.16634 & 0.23182 & 0.32875 \end{bmatrix} = \mathbf{\begin{bmatrix} 1.37983 & 0.71130 & -0.54365 \\ -0.36634 & -0.13182 & 0.07125 \end{bmatrix}} \\[0.03cm]
+\boldsymbol{\beta}_2^{\text{nuevo}} &= [0.2] - 1.0 [0.71578] = \mathbf{[-0.51578]} \\[0.03cm]
 \boldsymbol{\Omega}_2^{\text{nuevo}} &= \begin{bmatrix} -0.9 & 2.1 \end{bmatrix} - 1.0 \begin{bmatrix} 0.37127 & 0.47169 \end{bmatrix} = \mathbf{\begin{bmatrix} -1.27127 & 1.62831 \end{bmatrix}}
 \end{align*}
+}
 
-Como detalle adicional, la pérdida inicial promedio de los tres datos fue $L^{(0)} = \frac{0.009914 + 0.005312 + 1.210792}{3} \approx 0.4087$. Al aplicar este primer paso con $\alpha = 1.0$, el avance es bastante grande para los valores que maneja la red y hace que la salida se pase de largo (\textit{overshooting}). En la práctica, si usamos una tasa más pequeña y habitual como $\alpha \le 0.2$, el error va bajando de forma constante paso a paso.
-
-
-
-\subsection*{Verificación computacional y práctica en el Notebook 7.2}
-
-Para comprobar que los cálculos que hicimos a mano coinciden con la simulación en máquina, programamos la arquitectura completa de la Figura~\ref{fig:red} en el Notebook 7.2 vectorizando el paso hacia adelante y el paso hacia atrás.
-
-Para revisar la exactitud de las derivadas, se implementó una comprobación numérica por diferencias finitas con una perturbación de $\epsilon = 10^{-6}$:
-\[
-\frac{\partial L}{\partial \theta_j} \approx \frac{L(\boldsymbol{\theta} + \epsilon \mathbf{e}_j) - L(\boldsymbol{\theta} - \epsilon \mathbf{e}_j)}{2\epsilon}
-\]
-Al contrastar las derivadas analíticas con las numéricas en los 20 parámetros de la red, correspondientes a $\boldsymbol{\Omega}_0$ con 6 pesos, $\boldsymbol{\beta}_0$ con 3 sesgos, $\boldsymbol{\Omega}_1$ con 6 pesos, $\boldsymbol{\beta}_1$ con 2 sesgos, $\boldsymbol{\Omega}_2$ con 2 pesos y $\beta_2$ con 1 sesgo, la diferencia fue menor a $10^{-7}$, lo que confirma con exactitud cada matriz y vector que obtuvimos. Además, al probar una tasa de aprendizaje moderada de $\alpha = 0.2$, el error disminuye de forma constante desde $0.4087$ hasta $0.2798$, confirmando que los gradientes apuntan en la dirección de descenso correcta hacia el mínimo.
-
+Como detalle adicional, la pérdida inicial promedio de los tres puntos fue $L^{(0)} = \frac{0.009914 + 0.005312 + 1.210792}{3} \approx 0.4087$. Al dar este primer paso con $\alpha = 1.0$, el salto resulta demasiado grande para los pesos de la red y hace que la salida se pase de largo (\textit{overshooting}), subiendo el error a $2.1498$. En cambio, al emplear una tasa habitual y moderada como $\alpha = 0.2$, el error disminuye de forma constante desde $0.4087$ hasta $0.2798$, confirmando que los gradientes apuntan en la dirección correcta hacia el mínimo. Para corroborar la exactitud de todos estos cálculos manuales, en el Notebook~7.2 implementamos la red y comparamos cada derivada analítica con su aproximación numérica por diferencias finitas (con $\epsilon = 10^{-6}$); la diferencia obtenida en los 20 parámetros fue menor a $10^{-7}$, validando con total precisión cada matriz y vector derivados.
 
 \section*{II-B. Algoritmos de optimización}
 
+{\setlength{\intextsep}{3pt}\setlength{\abovecaptionskip}{2pt}\setlength{\belowcaptionskip}{2pt}\setlength{\abovedisplayskip}{2pt}\setlength{\belowdisplayskip}{2pt}
 Para entender cómo se comportan los optimizadores al entrenar una red neuronal, usamos la superficie del enunciado como función objetivo:
 \[
 f(x, y) = \frac{\sin\left(0.8(x^2 + y^2)\right)}{(x^2 + y^2)^{0.9}}
@@ -331,7 +321,7 @@ f(x, y) = \frac{\sin\left(0.8(x^2 + y^2)\right)}{(x^2 + y^2)^{0.9}}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[height=3.0cm, keepaspectratio]{images/figura_2_superficie.png}
+    \includegraphics[height=2.8cm, keepaspectratio]{images/figura_2_superficie.png}
     \caption{Superficie objetivo y efecto del ruido. A la izquierda se ve el relieve tridimensional $f(x, y)$ con sus anillos ondulados. A la derecha se muestra cómo baja el error al entrenar la red con tres niveles de ruido ($\sigma = 0.0$, $\sigma = 0.1$ y $\sigma = 0.3$).}
     \label{fig:superficie}
 \end{figure}
@@ -341,6 +331,9 @@ A la izquierda en la Figura~\ref{fig:superficie} vemos que esta función tiene u
 \subsection*{¿Cuál es el impacto del parámetro de ruido en el proceso de optimización?}
 
 El ruido proviene de las variaciones aleatorias en los datos y de calcular el gradiente usando muestras pequeñas (\textit{mini-batches}). En la gráfica de la derecha de la Figura~\ref{fig:superficie} se observa que tiene un doble efecto durante el entrenamiento: al comienzo resulta beneficioso porque las sacudidas ayudan a la red a no quedarse estancada en el primer valle o zona plana que encuentra, permitiéndole explorar y buscar mejores caminos. Sin embargo, al final del entrenamiento un nivel de ruido muy alto (curva roja) perjudica la precisión, ya que hace que los pesos bailen alrededor del mínimo sin poder asentarse en el valor óptimo. Por esta razón, en la práctica se suele reducir la tasa de aprendizaje progresivamente para explorar al inicio y lograr una convergencia fina al final.
+}
+
+\clearpage
 
 \subsection*{¿Cómo se diferencia el método del descenso del gradiente con el descenso estocástico y las versiones aceleradas?}
 
@@ -348,13 +341,13 @@ Para comparar los optimizadores, entrenamos la red con cuatro métodos distintos
 
 \begin{figure}[H]
     \centering
-    \includegraphics[height=3.0cm, keepaspectratio]{images/figura_3_optimizadores.png}
+    \includegraphics[height=2.8cm, keepaspectratio]{images/figura_3_optimizadores.png}
     \caption{Comparación de optimizadores y tamaño de la red. A la izquierda se muestra la rapidez con la que baja el error en cada método. A la derecha se compara el entrenamiento usando una red compacta, una intermedia y una grande.}
     \label{fig:optimizadores}
 \end{figure}
 
 Al analizar el comportamiento de cada método, encontramos diferencias fundamentales en su forma de cálculo, velocidad y estabilidad:
-\begin{itemize}\itemsep-2pt \topsep0pt \partopsep0pt \parsep0pt
+\begin{itemize}\itemsep-4pt \topsep0pt \partopsep0pt \parsep0pt
     \item \textbf{Descenso del gradiente:} Calcula el gradiente exacto usando todo el conjunto de entrenamiento para dar un solo paso. Aunque su trayectoria es muy suave y sin ruido, dar un único ajuste por época lo vuelve demasiado lento e ineficiente en tiempo real, además de que puede quedarse frenado con facilidad si cae en zonas planas o en mínimos locales.
     \item \textbf{Descenso del gradiente estocástico:} En vez de esperar a revisar todos los datos, divide el conjunto en grupos pequeños de 32 muestras y ajusta los pesos en cada grupo. Esto le permite hacer decenas de correcciones rápidas en una sola época, bajando el error mucho más rápido. Las pequeñas variaciones que introduce cada grupo generan sacudidas que le ayudan a no quedarse atascado en valles poco profundos.
     \item \textbf{Versiones con Momentum:} El descenso estocástico suele rebotar de lado a lado cuando el terreno tiene paredes muy empinadas y un fondo plano. Momentum corrige esto guardando una velocidad con los pasos anteriores. Como los rebotes van en direcciones opuestas se cancelan entre sí, mientras que el avance hacia adelante se va sumando, logrando que la red baje por el valle con mucha más rapidez y sin perder empuje en zonas planas.
@@ -369,118 +362,107 @@ En la gráfica de la derecha de la Figura~\ref{fig:optimizadores} comparamos el 
 
 Una época cuantifica el volumen de datos procesados (una pasada íntegra sobre el conjunto de entrenamiento), pero no refleja el esfuerzo computacional ni el tiempo transcurrido en el reloj. Por su parte, el tiempo de convergencia mide la duración temporal efectiva (segundos o minutos) que requiere el optimizador para alcanzar la cota de error deseada. En la práctica, mientras que el descenso del gradiente tradicional evalúa todo el conjunto para dar una sola actualización por época (resultando en un tiempo de reloj prohibitivo), métodos como SGD y Adam operan con mini-lotes (e.g. 32 muestras), realizando múltiples ajustes rápidos por época que reducen el tiempo total de convergencia de forma drástica.
 
-{\setlength{\abovedisplayskip}{1pt}\setlength{\belowdisplayskip}{1pt}\setlength{\jot}{0pt}
+\clearpage
+{\setlength{\abovedisplayskip}{1.5pt}\setlength{\belowdisplayskip}{1.5pt}\setlength{\jot}{0.5pt}
 \section*{II-C. Otros algoritmos de optimización}
 
+En esta sección analizamos cuatro algoritmos de optimización fundamentales utilizando la notación matemática del libro \textit{Understanding Deep Learning} (Simon Prince). Para cada uno explicamos por qué fue creado, cómo se usa en la práctica y su formulación matemática paso a paso.
+
 \subsubsection*{1. AdamW (Decoupled Weight Decay)}
-Corrige la interacción inadecuada entre la regularización $L_2$ y los momentos adaptativos de Adam: al agregar $\lambda \boldsymbol{\phi}_t$ al gradiente $\mathbf{g}_t$, la penalización se divide por $\sqrt{\tilde{\mathbf{v}}_t} + \epsilon$, reduciendo la regularización efectiva en parámetros frecuentes. AdamW desacopla la penalización y la aplica directamente a los pesos:
+En el algoritmo Adam tradicional, cuando se aplica regularización $L_2$ sumando una penalización directamente al gradiente, esta penalización termina dividiéndose entre la escala adaptativa $\sqrt{\tilde{\mathbf{v}}_t} + \epsilon$. Esto reduce de forma indeseada el decaimiento en los pesos que reciben gradientes grandes o frecuentes, perjudicando la capacidad de generalización del modelo. AdamW soluciona esto desacoplando la penalización del paso del gradiente y aplicándola directamente sobre los pesos mediante el factor $(1 - \alpha \lambda)$. En la práctica, esto garantiza que todos los parámetros decaigan de forma uniforme y controlada, convirtiéndose en el optimizador preferido para entrenar arquitecturas profundas como Transformers. Su formulación algorítmica es:
 \begin{align*}
 \mathbf{m}_{t+1} &= \beta \mathbf{m}_t + (1 - \beta) \mathbf{g}_t, \quad \tilde{\mathbf{m}}_{t+1} = \frac{\mathbf{m}_{t+1}}{1 - \beta^{t+1}} \\[0.01cm]
 \mathbf{v}_{t+1} &= \gamma \mathbf{v}_t + (1 - \gamma) (\mathbf{g}_t \odot \mathbf{g}_t), \quad \tilde{\mathbf{v}}_{t+1} = \frac{\mathbf{v}_{t+1}}{1 - \gamma^{t+1}} \\[0.01cm]
 \boldsymbol{\phi}_{t+1} &= (1 - \alpha \lambda) \boldsymbol{\phi}_t - \alpha \frac{\tilde{\mathbf{m}}_{t+1}}{\sqrt{\tilde{\mathbf{v}}_{t+1}} + \epsilon}
 \end{align*}
-El factor $(1 - \alpha \lambda)$ encoge uniformemente a $\boldsymbol{\phi}_t$ sin importar la curvatura ni la escala de cada coordenada.
 
 \subsubsection*{2. AdaDelta (Adaptación basada en unidades de actualización)}
-Supera la disminución monotónica de la tasa de aprendizaje en AdaGrad y la inconsistencia dimensional en las actualizaciones de parámetros. Emplea promedios móviles exponenciales de gradientes y de desplazamientos pasados:
+AdaDelta se diseñó para resolver la detención prematura de AdaGrad, cuya acumulación infinita de gradientes pasados reduce el tamaño del paso hasta congelar el entrenamiento, y para corregir la inconsistencia física entre las unidades del gradiente y las de los parámetros. Para ello, reemplaza la acumulación infinita por un promedio móvil exponencial reciente e introduce un segundo promedio móvil sobre el cuadrado de las actualizaciones pasadas $(\Delta \boldsymbol{\phi})^2$. Al dividir ambas escalas cuadráticas (\textit{RMS}), empareja las unidades dimensionales y prescinde por completo de fijar una tasa de aprendizaje manual $\alpha$. El algoritmo ejecuta:
 \begin{align*}
 \mathbf{v}_{t+1} &= \beta \mathbf{v}_t + (1 - \beta) (\mathbf{g}_t \odot \mathbf{g}_t), \quad \operatorname{RMS}[\mathbf{g}]_{t+1} = \sqrt{\mathbf{v}_{t+1} + \epsilon} \\[0.01cm]
 \Delta \boldsymbol{\phi}_{t+1} &= - \frac{\operatorname{RMS}[\Delta \boldsymbol{\phi}]_t}{\operatorname{RMS}[\mathbf{g}]_{t+1}} \odot \mathbf{g}_t, \quad \boldsymbol{\phi}_{t+1} = \boldsymbol{\phi}_t + \Delta \boldsymbol{\phi}_{t+1} \\[0.01cm]
 \mathbf{u}_{t+1} &= \beta \mathbf{u}_t + (1 - \beta) (\Delta \boldsymbol{\phi}_{t+1} \odot \Delta \boldsymbol{\phi}_{t+1}), \quad \operatorname{RMS}[\Delta \boldsymbol{\phi}]_{t+1} = \sqrt{\mathbf{u}_{t+1} + \epsilon}
 \end{align*}
-El paso se define por el cociente de magnitudes RMS, garantizando congruencia de unidades físicas.
 
 \subsubsection*{3. RMSDrop / RMSProp (Root Mean Square Propagation)}
-Evita la detención prematura de AdaGrad normalizando cada componente del gradiente mediante su promedio móvil cuadrático exponencial reciente ($\beta \approx 0.9$):
+Propuesto por Geoffrey Hinton, RMSProp se creó para evitar que AdaGrad se frene antes de tiempo en superficies de optimización no convexas. En lugar de sumar gradientes desde el inicio, emplea un factor de olvido exponencial ($\beta \approx 0.9$) para considerar solo las pendientes locales recientes. En la práctica, divide la tasa de aprendizaje entre la escala RMS de cada coordenada: amortigua el avance en direcciones empinadas con fuertes rebotes y lo amplifica en zonas planas, logrando avanzar de forma rápida y estable:
 \begin{align*}
 \mathbf{v}_{t+1} = \beta \mathbf{v}_t + (1 - \beta) (\mathbf{g}_t \odot \mathbf{g}_t), \quad \boldsymbol{\phi}_{t+1} = \boldsymbol{\phi}_t - \frac{\alpha}{\sqrt{\mathbf{v}_{t+1}} + \epsilon} \odot \mathbf{g}_t
 \end{align*}
 
 \subsubsection*{4. L-BFGS (Limited-memory Quasi-Newton)}
-Aproxima el método de Newton ($\boldsymbol{\phi}_{t+1} = \boldsymbol{\phi}_t - \alpha_t \mathbf{H}_t^{-1} \mathbf{g}_t$) en tiempo y memoria lineal $\mathcal{O}(mD)$ sin calcular ni almacenar la Hessiana $\mathbf{H}_t$, guardando los desplazamientos de los últimos $m$ pasos ($\mathbf{s}_k = \boldsymbol{\phi}_{k+1} - \boldsymbol{\phi}_k$, $\mathbf{y}_k = \mathbf{g}_{k+1} - \mathbf{g}_k$, $\rho_k = 1 / (\mathbf{y}_k^T \mathbf{s}_k)$). El producto $\mathbf{r} = \mathbf{H}_t^{-1} \mathbf{g}_t$ se calcula mediante recursión en dos bucles:
-\begin{itemize}\itemsep-3.5pt \parsep0pt \topsep0pt \partopsep0pt
-    \item \textit{Bucle hacia atrás:} Para $k = t-1, \dots, t-m$: $\alpha_k = \rho_k \mathbf{s}_k^T \mathbf{q}$, $\mathbf{q} \leftarrow \mathbf{q} - \alpha_k \mathbf{y}_k$ (con $\mathbf{q} = \mathbf{g}_t$).
-    \item \textit{Escalado y bucle hacia adelante:} $\mathbf{r} \leftarrow \frac{\mathbf{s}_{t-1}^T \mathbf{y}_{t-1}}{\mathbf{y}_{t-1}^T \mathbf{y}_{t-1}} \mathbf{q}$. Para $k = t-m, \dots, t-1$: $\beta_k = \rho_k \mathbf{y}_k^T \mathbf{r}$, $\mathbf{r} \leftarrow \mathbf{r} + \mathbf{s}_k (\alpha_k - \beta_k)$.
-    \item \textit{Actualización de parámetros:} Dirección de descenso $\mathbf{d}_t = -\mathbf{r}$ y paso $\boldsymbol{\phi}_{t+1} = \boldsymbol{\phi}_t + \alpha_t \mathbf{d}_t$ con búsqueda de línea.
-\end{itemize}
+El método clásico de Newton permite descender con gran precisión usando la curvatura de la Hessiana ($\mathbf{H}_t^{-1} \mathbf{g}_t$), pero en redes neuronales calcular y almacenar la Hessiana completa requiere $\mathcal{O}(D^2)$ de memoria y $\mathcal{O}(D^3)$ de cálculo, lo cual resulta imposible para miles de parámetros. L-BFGS resuelve esto aproximando la dirección de segundo orden sin almacenar nunca la matriz, guardando únicamente las diferencias de posiciones $\mathbf{s}_k = \boldsymbol{\phi}_{k+1} - \boldsymbol{\phi}_k$ y de gradientes $\mathbf{y}_k = \mathbf{g}_{k+1} - \mathbf{g}_k$ de los últimos $m$ pasos ($m \in [5, 20]$). Mediante una recursión eficiente en dos bucles calcula la dirección de descenso con costo lineal $\mathcal{O}(mD)$: fija $\mathbf{q} = \mathbf{g}_t$ y $\rho_k = 1/(\mathbf{y}_k^T \mathbf{s}_k)$; en el bucle hacia atrás calcula $\alpha_k = \rho_k \mathbf{s}_k^T \mathbf{q}$ y actualiza $\mathbf{q} \leftarrow \mathbf{q} - \alpha_k \mathbf{y}_k$; escala $\mathbf{r} = \left(\frac{\mathbf{s}_{t-1}^T \mathbf{y}_{t-1}}{\mathbf{y}_{t-1}^T \mathbf{y}_{t-1}}\right) \mathbf{q}$; en el bucle hacia adelante evalúa $\beta_k = \rho_k \mathbf{y}_k^T \mathbf{r}$ y acumula $\mathbf{r} \leftarrow \mathbf{r} + \mathbf{s}_k (\alpha_k - \beta_k)$; finalmente fija $\mathbf{d}_t = -\mathbf{r}$ y actualiza $\boldsymbol{\phi}_{t+1} = \boldsymbol{\phi}_t + \alpha_t \mathbf{d}_t$ con búsqueda de línea.
 }
 
 \clearpage
 {\setlength{\abovedisplayskip}{1.5pt}\setlength{\belowdisplayskip}{1.5pt}\setlength{\intextsep}{1pt}\setlength{\abovecaptionskip}{1pt}\setlength{\belowcaptionskip}{1pt}
 \section*{II-D. Inicialización}
 
-\subsection*{Derivación analítica paso a paso de la inicialización de He y supuesto de activación}
+\subsection*{Derivación analítica de la inicialización de He y supuesto de activación}
 
-Para analizar cómo cambia la varianza de la señal a medida que avanza por la red, consideramos dos capas consecutivas. Las preactivaciones de la capa previa son $\mathbf{f}$ (con dimensión $D_h$), las cuales pasan por la función de activación para dar $\mathbf{h} = a(\mathbf{f})$. La capa siguiente calcula sus nuevas preactivaciones $\mathbf{f}'$ sumando los sesgos y multiplicando los pesos por las activaciones entrantes:
+Para analizar cómo cambia la varianza de la señal a medida que avanza por la red neuronal, consideramos dos capas consecutivas. Las preactivaciones de la capa previa son $\mathbf{f}$ (con dimensión $D_h$), las cuales pasan por la función de activación para dar $\mathbf{h} = a(\mathbf{f})$. La capa siguiente calcula sus nuevas preactivaciones $\mathbf{f}'$ sumando los sesgos y multiplicando los pesos por las activaciones entrantes:
 \[
 f'_i = \beta_i + \sum_{j=1}^{D_h} \Omega_{ij} h_j
 \]
-Siguiendo las indicaciones del problema y de la sección 7.5 del libro, fijamos todos los sesgos en cero ($\beta_i = 0$). Los pesos se eligen de forma aleatoria e independiente con una distribución normal de media cero y varianza $\sigma_\Omega^2$, es decir $\Omega_{ij} \sim \mathcal{N}(0, \sigma_\Omega^2)$, y asumimos además que no dependen de las activaciones entrantes $h_j$.
+Siguiendo las indicaciones del enunciado y de la sección 7.5 del libro de Simon Prince, fijamos todos los sesgos en cero ($\beta_i = 0$). Los pesos se eligen de forma aleatoria e independiente mediante una distribución normal con media cero y varianza $\sigma_\Omega^2$, es decir $\Omega_{ij} \sim \mathcal{N}(0, \sigma_\Omega^2)$, asumiendo además que no dependen de las activaciones entrantes $h_j$.
 
-\textbf{1. Media de las nuevas preactivaciones:} Calculamos primero el valor promedio de la señal en la siguiente capa. Aplicando la propiedad de linealidad de la esperanza y recordando que los pesos tienen media cero y son independientes de las entradas:
+Calculamos en primer lugar el valor esperado o media de estas nuevas preactivaciones. Aplicando la propiedad de linealidad de la esperanza y recordando que los pesos tienen media cero y son independientes de las entradas, obtenemos:
 \[
 \mathbb{E}[f'_i] = \mathbb{E}\left[\sum_{j=1}^{D_h} \Omega_{ij} h_j\right] = \sum_{j=1}^{D_h} \mathbb{E}[\Omega_{ij}] \mathbb{E}[h_j] = \sum_{j=1}^{D_h} 0 \cdot \mathbb{E}[h_j] = 0
 \]
-
-\textbf{2. Varianza y anulación de términos cruzados:} Como la media es cero, la varianza es simplemente el promedio del cuadrado: $\operatorname{Var}[f'_i] = \mathbb{E}[(f'_i)^2]$. Desarrollando algebraicamente el cuadrado de la suma:
-\begin{align*}
-\operatorname{Var}[f'_i] &= \mathbb{E}\left[ \left( \sum_{j=1}^{D_h} \Omega_{ij} h_j \right)^2 \right] = \sum_{j=1}^{D_h} \mathbb{E}[\Omega_{ij}^2] \mathbb{E}[h_j^2] + \sum_{j=1}^{D_h} \sum_{k \neq j}^{D_h} \mathbb{E}[\Omega_{ij} \Omega_{ik}] \mathbb{E}[h_j h_k]
-\end{align*}
-Como los pesos de conexiones diferentes son independientes entre sí ($j \neq k$), su esperanza conjunta se factoriza como $\mathbb{E}[\Omega_{ij} \Omega_{ik}] = \mathbb{E}[\Omega_{ij}] \mathbb{E}[\Omega_{ik}] = 0 \cdot 0 = 0$. Por esta razón, todos los términos cruzados se anulan por completo. Sustituyendo la varianza de cada peso $\mathbb{E}[\Omega_{ij}^2] = \sigma_\Omega^2$, obtenemos directamente:
+Como la media es cero, la varianza es simplemente el promedio del cuadrado: $\operatorname{Var}[f'_i] = \mathbb{E}[(f'_i)^2]$. Desarrollando algebraicamente el cuadrado de la suma en componentes cuadráticas individuales y productos cruzados:
+\[
+\operatorname{Var}[f'_i] = \mathbb{E}\left[ \left( \sum_{j=1}^{D_h} \Omega_{ij} h_j \right)^2 \right] = \sum_{j=1}^{D_h} \mathbb{E}[\Omega_{ij}^2] \mathbb{E}[h_j^2] + \sum_{j=1}^{D_h} \sum_{k \neq j}^{D_h} \mathbb{E}[\Omega_{ij} \Omega_{ik}] \mathbb{E}[h_j h_k]
+\]
+Dado que los pesos de conexiones diferentes son independientes entre sí ($j \neq k$), su esperanza conjunta se factoriza como $\mathbb{E}[\Omega_{ij} \Omega_{ik}] = \mathbb{E}[\Omega_{ij}] \mathbb{E}[\Omega_{ik}] = 0 \cdot 0 = 0$. Por esta razón, todos los términos cruzados se anulan por completo. Sustituyendo la varianza de cada peso $\mathbb{E}[\Omega_{ij}^2] = \sigma_\Omega^2$, obtenemos directamente:
 \[
 \operatorname{Var}[f'_i] = \sum_{j=1}^{D_h} \sigma_\Omega^2 \mathbb{E}[h_j^2] = D_h \sigma_\Omega^2 \mathbb{E}[h_j^2]
 \]
 
-\textbf{3. Supuesto sobre la función de activación (ReLU):} ¿Qué supuesto sobre la activación se utiliza en esta derivación? Se asume que las preactivaciones de la capa anterior $f_j$ siguen una distribución simétrica alrededor de cero, con media cero ($\mathbb{E}[f_j] = 0$) y varianza $\sigma_f^2$. Esto significa que la probabilidad de que una entrada sea positiva o negativa es exactamente del 50\%. Al aplicar la función ReLU ($h_j = \max(0, f_j)$), todos los valores negativos se apagan a cero y los positivos quedan intactos. Calculamos el segundo momento $\mathbb{E}[h_j^2]$ integrando sobre la distribución:
+Para responder qué supuesto sobre la función de activación se utiliza en esta derivación, se asume que las preactivaciones de la capa previa $f_j$ siguen una distribución simétrica alrededor de cero, con media cero ($\mathbb{E}[f_j] = 0$) y varianza $\sigma_f^2$. Esto significa que la probabilidad de que una entrada sea positiva o negativa es exactamente del 50\%. Al aplicar la función de activación ReLU ($h_j = \max(0, f_j)$), todos los valores negativos se apagan a cero y los valores positivos se conservan intactos. Calculamos el segundo momento $\mathbb{E}[h_j^2]$ integrando sobre la distribución de probabilidad:
 \[
 \mathbb{E}[h_j^2] = \int_{-\infty}^{\infty} (\max(0, z))^2 p(z) \, dz = \int_{0}^{\infty} z^2 p(z) \, dz = \frac{1}{2} \int_{-\infty}^{\infty} z^2 p(z) \, dz = \frac{1}{2} \operatorname{Var}[f_j] = \frac{1}{2} \sigma_f^2
 \]
-
-\textbf{4. Condición de preservación de varianza (Ecuación 7.31 de UDL):} Al sustituir $\mathbb{E}[h_j^2] = \frac{1}{2} \sigma_f^2$ en la varianza de $f'_i$, llegamos a la ecuación 7.31 del texto:
+Este desarrollo demuestra que ReLU corta la varianza a la mitad. Al sustituir $\mathbb{E}[h_j^2] = \frac{1}{2} \sigma_f^2$ en la varianza de $f'_i$, llegamos a la ecuación 7.31 del libro de Simon Prince:
 \[
 \sigma_{f'}^2 = D_h \sigma_\Omega^2 \left( \frac{1}{2} \sigma_f^2 \right) = \frac{1}{2} D_h \sigma_\Omega^2 \sigma_f^2
 \]
-Para que la señal no se desvanezca hasta cero ni crezca de forma descontrolada al avanzar por capas profundas, exigimos que la varianza se conserve igual entre capas sucesivas ($\sigma_{f'}^2 = \sigma_f^2$). Igualando términos, despejamos directamente la regla de inicialización de He:
+Para que la señal no se desvanezca hasta cero ni crezca de forma descontrolada a través de capas profundas, exigimos que la varianza se conserve igual entre capas sucesivas en el paso hacia adelante ($\sigma_{f'}^2 = \sigma_f^2$). Igualando términos, despejamos directamente la regla de inicialización propuesta por He:
 \[
 \frac{1}{2} D_h \sigma_\Omega^2 = 1 \implies \sigma_\Omega^2 = \frac{2}{D_h} \implies \mathbf{\sigma_\Omega = \sqrt{\frac{2}{D_h}}}
 \]
-
-\textbf{5. Derivada y preservación del gradiente en el paso hacia atrás:} En el paso hacia atrás, aplicamos la regla de la cadena para derivar la función de pérdida respecto a la preactivación previa:
+En el paso hacia atrás, aplicamos la regla de la cadena para derivar la función de pérdida respecto a la preactivación anterior:
 \[
 \frac{\partial \ell}{\partial f_{k-1, j}} = \sum_{i=1}^{D_{\text{out}}} \frac{\partial \ell}{\partial f_{k, i}} \frac{\partial f_{k, i}}{\partial h_j} \frac{\partial h_j}{\partial f_{k-1, j}} = \sum_{i=1}^{D_{\text{out}}} \Omega_{ij} \frac{\partial \ell}{\partial f_{k, i}} \mathbb{I}(f_{k-1, j} > 0)
 \]
-donde $\mathbb{I}(f_{k-1, j} > 0)$ es la derivada de la función ReLU (vale 1 si la preactivación es positiva y 0 si es negativa). Por la simetría de la entrada, la derivada vale 1 la mitad de las veces, por lo que la varianza del gradiente retropropagado también conserva el factor de un medio: $\operatorname{Var}\left[\frac{\partial \ell}{\partial f_{k-1, j}}\right] = \frac{1}{2} D_{\text{out}} \sigma_\Omega^2 \operatorname{Var}\left[\frac{\partial \ell}{\partial f_k}\right]$, lo que daría $\sigma_\Omega^2 = \frac{2}{D_{\text{out}}}$ si calibráramos en la dirección de retroceso.
+donde $\mathbb{I}(f_{k-1, j} > 0)$ es la derivada de la función ReLU. Por la simetría de la entrada, esta derivada vale 1 la mitad de las veces, de modo que la varianza del gradiente retropropagado también conserva el factor de un medio: $\operatorname{Var}\left[\frac{\partial \ell}{\partial f_{k-1, j}}\right] = \frac{1}{2} D_{\text{out}} \sigma_\Omega^2 \operatorname{Var}\left[\frac{\partial \ell}{\partial f_k}\right]$, arrojando $\sigma_\Omega^2 = \frac{2}{D_{\text{out}}}$ para equilibrar el gradiente hacia atrás.
 
+\clearpage
 \subsection*{Inicialización Xavier / Glorot para activación sigmoide y comparación con He}
 
-\textbf{¿Por qué el supuesto de He deja de ser válido para la sigmoide de la Figura 1?}
-La función sigmoide $\sigma(z) = \frac{1}{1 + e^{-z}}$ siempre devuelve valores positivos en el intervalo $(0, 1)$, por lo que su valor medio no es cero sino $\mathbb{E}[h] \approx 0.5 \neq 0$. Además, la sigmoide nunca corta las activaciones a cero exacto, por lo que no existe el apagado del 50\% y el factor $\frac{1}{2}$ desaparece por completo. Cerca del origen ($z \approx 0$), la sigmoide opera en su zona lineal con pendiente suave, de modo que las activaciones conservan directamente la dispersión de las entradas: $\operatorname{Var}[h_j] \approx \operatorname{Var}[f_j]$.
+Al considerar la red neuronal de la Figura 1 con activaciones sigmoides, el supuesto anterior deja de ser válido. La función sigmoide $\sigma(z) = \frac{1}{1 + e^{-z}}$ siempre devuelve valores positivos en el rango $(0, 1)$, por lo que su valor medio no es cero sino $\mathbb{E}[h] \approx 0.5 \neq 0$. Además, la sigmoide no apaga a cero la mitad de las neuronas, de manera que el factor de un medio desaparece por completo. Cerca del origen ($z \approx 0$), la sigmoide opera en su zona lineal con pendiente suave, por lo que las activaciones transmiten directamente la dispersión de las entradas: $\operatorname{Var}[h_j] \approx \operatorname{Var}[f_j]$.
 
-\textbf{Derivación analítica de Xavier hacia adelante y hacia atrás:}
-En el paso hacia adelante (\textit{forward}), al no existir el recorte a la mitad, la varianza transmitida por una capa con $D_{\text{in}}$ entradas es $\operatorname{Var}[f'_i] = \sum_{j=1}^{D_{\text{in}}} \sigma_\Omega^2 \operatorname{Var}[h_j] \approx D_{\text{in}} \sigma_\Omega^2 \operatorname{Var}[f_j]$. Exigir que la señal conserve su escala unitaria hacia adelante impone $D_{\text{in}} \sigma_\Omega^2 = 1 \implies \sigma_{\Omega, \text{fwd}}^2 = \frac{1}{D_{\text{in}}}$.
+En el paso hacia adelante (\textit{forward}), al no existir el recorte a la mitad, la varianza transmitida por una capa con $D_{\text{in}}$ entradas es $\operatorname{Var}[f'_i] = \sum_{j=1}^{D_{\text{in}}} \sigma_\Omega^2 \operatorname{Var}[h_j] \approx D_{\text{in}} \sigma_\Omega^2 \operatorname{Var}[f_j]$. Exigir que la señal conserve su escala hacia adelante impone $D_{\text{in}} \sigma_\Omega^2 = 1 \implies \sigma_{\Omega, \text{fwd}}^2 = \frac{1}{D_{\text{in}}}$. En el paso hacia atrás (\textit{backward}), derivamos la pérdida respecto a la preactivación previa con la derivada de la sigmoide $\sigma'(t) = \sigma(t)(1 - \sigma(t))$ y evaluamos la varianza del gradiente retropropagado a través de las $D_{\text{out}}$ conexiones de salida:
+\[
+\frac{\partial \ell}{\partial f_{k-1, j}} = \left( \sum_{i=1}^{D_{\text{out}}} \Omega_{ij} \frac{\partial \ell}{\partial f_{k, i}} \right) \sigma'(f_{k-1, j}) \implies \operatorname{Var}\left[\frac{\partial \ell}{\partial f_{k-1, j}}\right] = D_{\text{out}} \sigma_\Omega^2 \operatorname{Var}\left[\frac{\partial \ell}{\partial f_k}\right]
+\]
+Para que los gradientes no se desvanezcan ni exploten al retroceder capa por capa, se exige $D_{\text{out}} \sigma_\Omega^2 = 1 \implies \sigma_{\Omega, \text{bwd}}^2 = \frac{1}{D_{\text{out}}}$.
 
-En el paso hacia atrás (\textit{backward}), usamos la regla de la cadena para derivar la pérdida respecto a la preactivación previa con la derivada de la sigmoide $\sigma'(t) = \sigma(t)(1 - \sigma(t))$, y calculamos la varianza del gradiente retropropagado:
-\begin{align*}
-\frac{\partial \ell}{\partial f_{k-1, j}} &= \sum_{i=1}^{D_{\text{out}}} \frac{\partial \ell}{\partial f_{k, i}} \frac{\partial f_{k, i}}{\partial f_{k-1, j}} = \left( \sum_{i=1}^{D_{\text{out}}} \Omega_{ij} \frac{\partial \ell}{\partial f_{k, i}} \right) \sigma'(f_{k-1, j}) \\[0.05cm]
-\operatorname{Var}\left[\frac{\partial \ell}{\partial f_{k-1, j}}\right] &= \sum_{i=1}^{D_{\text{out}}} \mathbb{E}[\Omega_{ij}^2] \operatorname{Var}\left[\frac{\partial \ell}{\partial f_{k, i}}\right] = D_{\text{out}} \sigma_\Omega^2 \operatorname{Var}\left[\frac{\partial \ell}{\partial f_k}\right]
-\end{align*}
-Para evitar que los gradientes se desvanezcan o exploten al retroceder capa por capa, se exige $D_{\text{out}} \sigma_\Omega^2 = 1 \implies \sigma_{\Omega, \text{bwd}}^2 = \frac{1}{D_{\text{out}}}$.
-
-\textbf{¿Por qué Xavier promedia entrada y salida mientras que He solo usa la de entrada?}
-Cuando una capa tiene diferente número de entradas y salidas ($D_{\text{in}} \neq D_{\text{out}}$), ninguna varianza puede cumplir ambas condiciones simultáneamente. Glorot y Bengio resuelven este dilema calculando la media armónica entre ambas condiciones:
+Esto explica por qué Xavier promedia entrada y salida mientras que He solo usa la de entrada. Cuando una capa tiene diferente número de entradas y salidas ($D_{\text{in}} \neq D_{\text{out}}$), ninguna varianza única puede satisfacer ambas condiciones al mismo tiempo. Glorot y Bengio resuelven este compromiso calculando la media armónica entre ambas condiciones:
 \[
 \sigma_\Omega^2 = \frac{2}{\frac{1}{\sigma_{\Omega, \text{fwd}}^2} + \frac{1}{\sigma_{\Omega, \text{bwd}}^2}} = \frac{2}{D_{\text{in}} + D_{\text{out}}} \implies \mathbf{\sigma_\Omega = \sqrt{\frac{2}{D_{\text{in}} + D_{\text{out}}}}}
 \]
-En cambio, en redes con activación ReLU, el corte del 50\% ocurre exactamente igual hacia adelante ($h = \max(0, f)$) que hacia atrás ($\frac{\partial h}{\partial f} = \mathbb{I}(f > 0)$). Ambas direcciones comparten el mismo factor 2 en el numerador ($\sigma_{\text{fwd}}^2 = 2/D_{\text{in}}$ y $\sigma_{\text{bwd}}^2 = 2/D_{\text{out}}$). Por esta razón, calibrar los pesos únicamente con las neuronas de entrada ($\sigma_\Omega = \sqrt{2/D_{\text{in}}}$) asegura un paso hacia adelante balanceado, y en el paso hacia atrás los gradientes sólo cambian por la proporción de dimensiones $\prod \frac{D_{\text{in}}}{D_{\text{out}}}$, la cual permanece acotada y estable sin necesidad de promediar la salida.
+En cambio, en redes con activación ReLU el corte del 50\% ocurre exactamente igual hacia adelante ($h = \max(0, f)$) que hacia atrás ($\frac{\partial h}{\partial f} = \mathbb{I}(f > 0)$). Ambas direcciones comparten el mismo factor 2 en el numerador ($\sigma_{\text{fwd}}^2 = 2/D_{\text{in}}$ y $\sigma_{\text{bwd}}^2 = 2/D_{\text{out}}$). Por esta razón, calibrar los pesos únicamente con las neuronas de entrada ($\sigma_\Omega = \sqrt{2/D_{\text{in}}}$) asegura un paso hacia adelante balanceado, y en el paso hacia atrás los gradientes solo cambian por la proporción de dimensiones sucesivas $\prod \frac{D_{\text{in}}}{D_{\text{out}}}$, la cual permanece acotada y estable sin necesidad de promediar la salida.
 
 \subsection*{Cálculo numérico de $\sigma_\Omega$ para cada capa de la red de la Figura 1}
-Evaluamos analíticamente ambas fórmulas para cada matriz de pesos de la red ($2 \to 3 \to 2 \to 1$):
+
+Evaluamos analíticamente ambas fórmulas para cada matriz de pesos de la red de la Figura 1 ($2 \to 3 \to 2 \to 1$):
 \vspace{-0.1cm}
 \begin{table}[H]
 \centering
 \footnotesize
-\renewcommand{\arraystretch}{0.72}
-\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{0.75}
+\setlength{\tabcolsep}{5pt}
 \begin{tabular}{lccccc}
 \toprule
 \textbf{Capa} & $D_{\text{in}}$ & $D_{\text{out}}$ & \textbf{Fórmula de He} & \textbf{Fórmula de Xavier} & \textbf{Valores numéricos} \\
@@ -494,15 +476,17 @@ Capa 2 / Salida ($\boldsymbol{\Omega}_2$) & 2 & 1 & $\sqrt{2/2} = 1.0$ & $\sqrt{
 \vspace{-0.15cm}
 
 \subsection*{Comportamiento en redes profundas ($K \ge 20$ capas) y práctica del Notebook 7.3}
-A partir del Notebook 7.3 construimos una red profunda de 20 capas ocultas ($D=80$, ReLU) para evaluar experimentalmente la evolución de la varianza hacia adelante y la magnitud de los gradientes hacia atrás (Figura~\ref{fig:inicializacion}):
+
+A partir del Notebook 7.3 implementamos una red profunda de 20 capas ocultas ($D=80$, ReLU) para evaluar experimentalmente la evolución de la varianza hacia adelante y la magnitud de los gradientes hacia atrás (Figura~\ref{fig:inicializacion}):
+
 \begin{figure}[H]
     \centering
-    \includegraphics[height=3.0cm, keepaspectratio]{images/figura_4_inicializacion.png}
+    \includegraphics[height=2.8cm, keepaspectratio]{images/figura_4_inicializacion.png}
     \caption{Simulación en red profunda de 20 capas ($D=80$, ReLU) del Notebook 7.3. Izquierda: evolución de la varianza en el paso hacia adelante. Derecha: desviación estándar de los gradientes retropropagados.}
     \label{fig:inicializacion}
 \end{figure}
 
-El análisis de las curvas experimentales muestra el impacto directo de la inicialización en el entrenamiento profundo. Cuando la varianza es insuficiente ($0.2 \times \text{He}$), la señal se apaga hasta colapsar ($\operatorname{Var}[f_{20}] \approx 10^{-17}$) y los gradientes retropropagados caen a $10^{-8}$ en las primeras capas, provocando un severo desvanecimiento del gradiente (\textit{vanishing gradients}) que frena el aprendizaje. Si la varianza es excesiva ($3.0 \times \text{He}$), la señal se amplifica superando $10^7$ y los gradientes se disparan a $10^8$, desatando una explosión del gradiente (\textit{exploding gradients}) y saturación numérica (\textit{NaN}). En cambio, la inicialización de He ($2/D_h$) conserva la varianza ($\approx 0.02$) y la escala de gradientes ($\approx 0.35$) estables a lo largo de las 20 capas, garantizando un aprendizaje profundo balanceado y confiable.
+El análisis de las curvas experimentales muestra el impacto directo de la inicialización en el entrenamiento profundo. Cuando la varianza es insuficiente ($0.2 \times \text{He}$), la señal se apaga progresivamente hasta colapsar ($\operatorname{Var}[f_{20}] \approx 10^{-17}$) y los gradientes retropropagados caen a $10^{-8}$ en las primeras capas, provocando un severo desvanecimiento del gradiente (\textit{vanishing gradients}) que frena por completo el aprendizaje. Si la varianza es excesiva ($3.0 \times \text{He}$), la señal se amplifica superando $10^7$ y los gradientes se disparan por encima de $10^8$, desatando una explosión del gradiente (\textit{exploding gradients}) y saturación numérica (\textit{NaN}). En cambio, la inicialización de He ($2/D_h$) conserva la varianza ($\approx 0.02$) y la escala de gradientes ($\approx 0.35$) estables a lo largo de las 20 capas, garantizando un aprendizaje profundo balanceado y confiable.
 }
 
 \end{document}
