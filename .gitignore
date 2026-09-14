@@ -12,8 +12,6 @@ __pycache__/
 # Jupyter Notebooks
 .ipynb_checkpoints/
 
-# Archivos de texto planos
-*.txt
 
 # LaTeX
 *.aux
