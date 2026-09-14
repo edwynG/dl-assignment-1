@@ -1,0 +1,15 @@
+# Tarea 1: Fundamentos de redes neuronales
+
+A partir de los principios discutidos en clase y en el libro de Simon Prince, esta tarea abarca la resolución de catorce cuadernos prácticos de fundamentos de redes neuronales, la elaboración de un informe técnico en latex sobre retropropagación, optimización e inicialización de pesos, y el diseño de un experimento en un cuaderno de jupyter donde construimos una red neuronal desde cero para mantenimiento predictivo y guardamos el modelo óptimo.
+
+## Informe técnico y notebooks
+
+A lo largo de los catorce cuadernos de la materia revisamos paso a paso los conceptos teóricos que hacen funcionar a las redes neuronales. Vimos cómo las funciones no lineales como relu permiten doblar el espacio y formar quiebres para resolver problemas no separables, dedujimos las funciones de pérdida como la entropía cruzada a partir de la probabilidad, y estudiamos cómo los optimizadores evolucionaron desde el descenso de gradiente básico hasta adam para dar pasos más inteligentes con inercia. También practicamos el cálculo manual de las derivadas con la regla de la cadena y la importancia de calibrar los números iniciales de los pesos.
+
+En el informe técnico desarrollamos cuatro análisis fundamentales: el cálculo manual y las ecuaciones de retropropagación para una red con activación sigmoide, el comportamiento y la velocidad de convergencia de los optimizadores sobre superficies no convexas, la descripción matemática de algoritmos como adamw, adadelta, rmsprop y l-bfgs, y la derivación teórica junto con la simulación numérica de la inicialización de pesos de he y xavier en redes profundas de veinte capas.
+
+## Resumen del experimento
+
+El experimento consistió en diseñar y entrenar una red neuronal desde cero para un problema de mantenimiento predictivo basado en sensores de temperatura y vibración. Para ello, se preparó un conjunto de datos sintéticos en `sensor_data.csv` con dos mil quinientas medidas distribuidas en una región segura de operación y zonas de falla que aparecen cuando la máquina se sobrecalienta, vibra excesivamente o trabaja con lubricante frío. Como referencia inicial, se evaluó una regresión logística que obtuvo un 52% de aciertos, lo cual es equiparable al azar debido a su incapacidad para modelar fronteras no lineales.
+
+Para mejorar el rendimiento, se implementó una red neuronal simple en un cuaderno de jupyter, evitando librerías de deep learning. La red se estructuró con estandarización z-score, inicialización de He para romper la simetría inicial, activaciones ReLU en capas ocultas para facilitar el entrenamiento de redes profundas, y una sigmoide en la salida para obtener probabilidades de falla. El entrenamiento se realizó mediante minibatch gradient descent con el optimizador Adam, y se implementó un mecanismo de parada temprana para guardar el modelo con menor error de validación en `optimal_model.npz`. Este enfoque experimental permitió verificar la teoría vista en clase, especialmente en lo referente a la importancia de la inicialización de pesos y las funciones de activación.
