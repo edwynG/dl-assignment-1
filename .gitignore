@@ -30,7 +30,7 @@ __pycache__/
 
 # Directorios de salida generados por el script
 build/
-
+!docs/**/*.pdf
 
 # Archivos del sistema operativo (opcional pero recomendado)
 .DS_Store
